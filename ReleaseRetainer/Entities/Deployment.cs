@@ -1,6 +1,6 @@
 ﻿namespace ReleaseRetainer.Entities;
 
-public record Deployment
+public class Deployment
 {
     public required string Id { get; set; }
     public required string ReleaseId { get; set; }

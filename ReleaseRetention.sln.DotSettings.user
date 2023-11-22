@@ -1,3 +1,9 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=c15bf9bc_002D691b_002D4c1e_002D8b6b_002De7149b1bc056/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="ReleasesDeployedToTheSameEnvironment" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::0470D118-766D-430E-93EB-6410BAB4F3F0::net8.0::ReleaseRetainer.Test.RetainerTests.ReleasesDeployedToTheSameEnvironment&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::0470D118-766D-430E-93EB-6410BAB4F3F0::net8.0::ReleaseRetainer.Test.RetainerTests.ReleasesDeployedToTheDifferentEnvironment&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
 	<s:Boolean x:Key="/Default/ResxEditorPersonal/CheckedGroups/=ReleaseRetainer_002FProperties_002FResources/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/ResxEditorPersonal/Initialized/@EntryValue">True</s:Boolean></wpf:ResourceDictionary>

@@ -5,7 +5,7 @@ namespace ReleaseRetainer;
 
 public class Retainer
 {
-    public IEnumerable<Release> Retain(RetainReleaseOptions options)
+    public IEnumerable<Release> RetainReleases(RetainReleaseOptions options)
     {
         var projectByIdMap = options.Projects.ToDictionary(k => k.Id);
         var releasesByProjectIdLookup = options.Releases.ToLookup(r => r.ProjectId); // releases can be orphaned, use lookup for handling nullable ProjectId gracefully

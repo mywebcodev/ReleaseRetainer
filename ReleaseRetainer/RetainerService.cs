@@ -23,6 +23,12 @@ public class RetainerService(ILogger<RetainerService> logger) : IRetainerService
     public IEnumerable<Release> RetainReleases(RetainReleaseOptions options)
     {
         var numOfReleasesToKeep = options.NumOfReleasesToKeep;
+
+        if (numOfReleasesToKeep <= 0)
+        {
+            throw new ArgumentException($@"{nameof(options.NumOfReleasesToKeep)} must be greater than zero.", nameof(options.NumOfReleasesToKeep));
+        }
+
         var deployments = options.Deployments;
         var environments = options.Environments;
         var projects = options.Projects;
@@ -49,11 +55,16 @@ public class RetainerService(ILogger<RetainerService> logger) : IRetainerService
             foreach (var environment in environments)
             {
                 // Get releases for the current project and environment combination
-                // Use DistinctBy to avoid duplicated releases
                 var retainedProjectReleases = releasesByProjectIdLookup[project.Id]
+                                              // Filter releases that have deployments in the current environment
                                               .Where(r => releaseDeploymentsPerEnvironment.ContainsKey((r.Id, environment.Id)))
+                                              // Use DistinctBy to avoid duplicated releases based on their Id
                                               .DistinctBy(r => r.Id)
+                                              // Order releases by the most recent deployment in the current environment,
                                               .OrderByDescending(r => releaseDeploymentsPerEnvironment[(r.Id, environment.Id)].First().DeployedAt)
+                                              // then by the release creation date in descending order
+                                              .ThenByDescending(r => r.Created)
+                                              // Take the specified number of releases to retain
                                               .Take(numOfReleasesToKeep);
 
                 foreach (var release in retainedProjectReleases)
@@ -62,7 +73,7 @@ public class RetainerService(ILogger<RetainerService> logger) : IRetainerService
 
                     // Log if the release has been retained
                     // Log if the release was already retained but deployed on a different environment
-                    logger.LogInformation("'{ReleaseId}' kept because it was most recently deployed to '{EnvironmentId}'", release.Id, environment.Id);
+                    logger.Log(LogLevel.Information, "'{ReleaseId}' kept because it was most recently deployed to '{EnvironmentId}'", release.Id, environment.Id);
                 }
             }
         }

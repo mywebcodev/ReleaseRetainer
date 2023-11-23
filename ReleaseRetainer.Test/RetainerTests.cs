@@ -1,4 +1,7 @@
-﻿using FluentAssertions;
+﻿using AutoFixture;
+using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
 using NUnit.Framework;
 using ReleaseRetainer.Entities;
 using ReleaseRetainer.Models;
@@ -9,12 +12,16 @@ namespace ReleaseRetainer.Test;
 [TestFixture]
 public class RetainerTests
 {
-    private Retainer _systemUnderTest;
+    private RetainerService _systemUnderTest;
+    private ILogger<RetainerService> _logger;
+    private Fixture _fixture;
 
     [OneTimeSetUp]
     public void SetUp()
     {
-        _systemUnderTest = new Retainer();
+        _fixture = new Fixture();
+        _logger = Substitute.For<ILogger<RetainerService>>();
+        _systemUnderTest = new RetainerService(_logger);
     }
 
     [Test]
@@ -48,14 +55,6 @@ public class RetainerTests
             }
         };
 
-        var expectedRelease = new Release()
-        {
-            Id = "Release-1",
-            ProjectId = "Project-1",
-            Version = "1.0.0",
-            Created = DateTime.Parse("2000-01-01T08:00:00"),
-        };
-
         var releases = new List<Release>
         {
             new()
@@ -65,7 +64,13 @@ public class RetainerTests
                 Version = "1.0.1",
                 Created = DateTime.Parse("2000-01-01T09:00:00"),
             },
-            expectedRelease
+            new()
+            {
+                Id = "Release-1",
+                ProjectId = "Project-1",
+                Version = "1.0.0",
+                Created = DateTime.Parse("2000-01-01T08:00:00")
+            }
         };
 
         var projects = new List<Project>
@@ -87,10 +92,10 @@ public class RetainerTests
         };
 
         // Act
-        var result = _systemUnderTest.Retain(options);
+        _systemUnderTest.RetainReleases(options);
 
         // Assert
-        result.Should().Contain(expectedRelease);
+        _logger.Received(1).LogInformation("'Release-1' kept because it was the most recently deployed to 'Environment-1'");
     }
 
         [Test]
@@ -166,7 +171,7 @@ public class RetainerTests
         };
 
         // Act
-        var result = _systemUnderTest.Retain(options);
+        var result = _systemUnderTest.RetainReleases(options);
 
         // Assert
         result.Should().Contain(releases);

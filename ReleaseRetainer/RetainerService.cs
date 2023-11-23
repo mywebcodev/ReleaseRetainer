@@ -17,9 +17,12 @@ public interface IRetainerService
     IEnumerable<Release> RetainReleases(RetainReleaseOptions options);
 }
 
+// https://learn.microsoft.com/en-us/dotnet/core/extensions/logging-library-authors
+// Using Microsoft.Extensions.Logging.ILogger is preferable for logging in a public .NET library
+// because it allows the consumers of your library to plug in their own logging implementation.
+// It provides a flexible and extensible way to handle logging.
 public class RetainerService(ILogger<RetainerService> logger) : IRetainerService
 {
-    // Inject ILogger through constructor for logging
     public IEnumerable<Release> RetainReleases(RetainReleaseOptions options)
     {
         var numOfReleasesToKeep = options.NumOfReleasesToKeep;

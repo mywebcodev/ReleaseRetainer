@@ -4,30 +4,52 @@ using ReleaseRetainer.Models;
 
 namespace ReleaseRetainer;
 
+/// <summary>
+/// Service responsible for retaining a specified number of releases based on deployment history.
+/// </summary>
 public interface IRetainerService
 {
+    /// <summary>
+    /// Retains releases based on the specified options, considering deployment history.
+    /// </summary>
+    /// <param name="options">Options specifying the Deployments, Environments, Projects, Releases and NumOfReleasesToKeep.</param>
+    /// <returns>An IEnumerable of unique retained releases that have most recently been deployed.</returns>
     IEnumerable<Release> RetainReleases(RetainReleaseOptions options);
 }
 
-public class RetainerService(ILogger<RetainerService>? logger = null) : IRetainerService
+public class RetainerService(ILogger<RetainerService> logger) : IRetainerService
 {
+    // Inject ILogger through constructor for logging
     public IEnumerable<Release> RetainReleases(RetainReleaseOptions options)
     {
         var numOfReleasesToKeep = options.NumOfReleasesToKeep;
         var deployments = options.Deployments;
         var environments = options.Environments;
         var projects = options.Projects;
-        var result = new List<Release>();
+        var retainedReleases = new List<Release>();
 
+        // Create lookup for releases by ProjectId
         var releasesByProjectIdLookup = options.Releases.ToLookup(r => r.ProjectId);
+
+        // Create a dictionary for deployments per environment, ordered by DeployedAt
         var releaseDeploymentsPerEnvironment = deployments
                                                .GroupBy(d => (d.ReleaseId, d.EnvironmentId))
                                                .ToDictionary(k => k.Key, v => v.OrderByDescending(d => d.DeployedAt).ToList());
 
+        // For each **project**/**environment** combination,
+        // retain `n` **releases** that have been most recently deployed,
+        // where `n` is the number of releases to keep.
+
+        // Note: We may end up with duplicate releases following the rule above.
+        // For instance, a release with the same Id can be deployed within different projects or environments.
+        // To avoid duplicates, an additional check is needed:
+        // If a release with the same Id is already retained, skip retaining it.
         foreach (var project in projects)
         {
             foreach (var environment in environments)
             {
+                // Get releases for the current project and environment combination
+                // Use DistinctBy to avoid duplicated releases
                 var retainedProjectReleases = releasesByProjectIdLookup[project.Id]
                                               .Where(r => releaseDeploymentsPerEnvironment.ContainsKey((r.Id, environment.Id)))
                                               .DistinctBy(r => r.Id)
@@ -36,14 +58,15 @@ public class RetainerService(ILogger<RetainerService>? logger = null) : IRetaine
 
                 foreach (var release in retainedProjectReleases)
                 {
-                    result.Add(release);
+                    retainedReleases.Add(release);
 
-                    var deployment = releaseDeploymentsPerEnvironment[(release.Id, environment.Id)].First();
-                    logger?.LogInformation("'{ReleaseId}' kept because it was most recently deployed to '{EnvironmentId}'", release.Id, deployment.EnvironmentId);
+                    // Log if the release has been retained
+                    // Log if the release was already retained but deployed on a different environment
+                    logger.LogInformation("'{ReleaseId}' kept because it was most recently deployed to '{EnvironmentId}'", release.Id, environment.Id);
                 }
             }
         }
 
-        return result;
+        return retainedReleases;
     }
 }

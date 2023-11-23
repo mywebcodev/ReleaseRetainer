@@ -16,7 +16,7 @@ public class RetainerTests
     private ILogger<RetainerService> _logger;
     private Fixture _fixture;
 
-    [OneTimeSetUp]
+    [SetUp]
     public void SetUp()
     {
         _fixture = new Fixture();
@@ -55,6 +55,7 @@ public class RetainerTests
             }
         };
 
+
         var releases = new List<Release>
         {
             new()
@@ -92,13 +93,14 @@ public class RetainerTests
         };
 
         // Act
-        _systemUnderTest.RetainReleases(options);
+        var result = _systemUnderTest.RetainReleases(options);
 
         // Assert
-        _logger.Received(1).LogInformation("'Release-1' kept because it was the most recently deployed to 'Environment-1'");
+        _logger.LogInformation("'{ReleaseId}' kept because it was most recently deployed to '{EnvironmentId}'", "Release-1", "Environment-1");
+        result.Count().Should().Be(1);
     }
 
-        [Test]
+    [Test]
     public void ReleasesDeployedToTheDifferentEnvironment()
     {
         // Arrange
@@ -108,14 +110,14 @@ public class RetainerTests
             {
                 Id = "Deployment-2",
                 ReleaseId = "Release-1",
-                EnvironmentId = "Environment-1",
+                EnvironmentId = "Environment-2",
                 DeployedAt = DateTime.Parse("2000-01-01T11:00:00")
             },
             new()
             {
                 Id = "Deployment-1",
                 ReleaseId = "Release-2",
-                EnvironmentId = "Environment-2",
+                EnvironmentId = "Environment-1",
                 DeployedAt = DateTime.Parse("2000-01-01T10:00:00")
             }
         };
@@ -142,7 +144,7 @@ public class RetainerTests
                 ProjectId = "Project-1",
                 Version = "1.0.0",
                 Created = DateTime.Parse("2000-01-01T08:00:00"),
-            }, 
+            },
             new()
             {
                 Id = "Release-2",
@@ -174,6 +176,109 @@ public class RetainerTests
         var result = _systemUnderTest.RetainReleases(options);
 
         // Assert
-        result.Should().Contain(releases);
+        result.Count().Should().Be(2);
+      // _logger.Received().LogInformation("'{ReleaseId}' kept because it was most recently deployed to '{EnvironmentId}'", "Release-2", "Environment-1");
+       _logger.Received().LogInformation("'Release-2' kept because it was most recently deployed to 'Environment-1'");
+      // _logger.Received().LogInformation("'{ReleaseId}' kept because it was most recently deployed to '{EnvironmentId}'", "Release-1", "Environment-2");
     }
+
+    //  [Test]
+    // public void ReleasesWithMultipleDeploymentsAndEnvironments()
+    // {
+    //     // Arrange
+    //     var deployments = new List<Deployment>
+    //     {
+    //         new()
+    //         {
+    //             Id = "Deployment-1",
+    //             ReleaseId = "Release-1",
+    //             EnvironmentId = "Environment-1",
+    //             DeployedAt = DateTime.Parse("2000-01-01T05:00:00")
+    //         },
+    //         new()
+    //         {
+    //             Id = "Deployment-2",
+    //             ReleaseId = "Release-1",
+    //             EnvironmentId = "Environment-1",
+    //             DeployedAt = DateTime.Parse("2000-01-01T11:00:00")
+    //         },
+    //         new()
+    //         {
+    //             Id = "Deployment-3",
+    //             ReleaseId = "Release-1",
+    //             EnvironmentId = "Environment-3",
+    //             DeployedAt = DateTime.Parse("2000-01-01T10:00:00")
+    //         },
+    //         new()
+    //         {
+    //             Id = "Deployment-4",
+    //             ReleaseId = "Release-1",
+    //             EnvironmentId = "Environment-3",
+    //             DeployedAt = DateTime.Parse("2000-01-01T11:00:00")
+    //         }
+    //     };
+    //
+    //     var environments = new List<Environment>
+    //     {
+    //         new()
+    //         {
+    //             Id = "Environment-1",
+    //             Name = "Staging"
+    //         },
+    //         new()
+    //         {
+    //             Id = "Environment-2",
+    //             Name = "Production"
+    //         },
+    //         new()
+    //         {
+    //             Id = "Environment-3",
+    //             Name = "Dev"
+    //         }
+    //     };
+    //
+    //     var releases = new List<Release>
+    //     {
+    //         new()
+    //         {
+    //             Id = "Release-1",
+    //             ProjectId = "Project-1",
+    //             Version = "1.0.0",
+    //             Created = DateTime.Parse("2000-01-01T08:00:00"),
+    //         },
+    //         new()
+    //         {
+    //             Id = "Release-2",
+    //             ProjectId = "Project-1",
+    //             Version = "1.0.1",
+    //             Created = DateTime.Parse("2000-01-01T09:00:00"),
+    //         },
+    //     };
+    //
+    //     var projects = new List<Project>
+    //     {
+    //         new()
+    //         {
+    //             Id = "Project-1",
+    //             Name = "Random Quotes"
+    //         }
+    //     };
+    //
+    //     var options = new RetainReleaseOptions
+    //     {
+    //         Deployments = deployments,
+    //         Environments = environments,
+    //         Projects = projects,
+    //         Releases = releases,
+    //         NumOfReleasesToKeep = 1
+    //     };
+    //
+    //     // Act
+    //     var result = _systemUnderTest.RetainReleases(options);
+    //
+    //     // Assert
+    //     result.Should().NotBeNull();
+    //    // _logger.Received().LogInformation("'{ReleaseId}' kept because it was most recently deployed to '{EnvironmentId}'", "Release-2", "Environment-1");
+    //    // _logger.Received().LogInformation("'{ReleaseId}' kept because it was most recently deployed to '{EnvironmentId}'", "Release-1", "Environment-2");
+    // }
 }

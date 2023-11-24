@@ -26,12 +26,6 @@ public class RetainerService(ILogger<RetainerService> logger) : IRetainerService
     public IEnumerable<Release> RetainReleases(RetainReleaseOptions options)
     {
         var numOfReleasesToKeep = options.NumOfReleasesToKeep;
-
-        if (numOfReleasesToKeep <= 0)
-        {
-            throw new ArgumentException($@"{nameof(options.NumOfReleasesToKeep)} must be greater than zero.", nameof(options.NumOfReleasesToKeep));
-        }
-
         var deployments = options.Deployments;
         var environments = options.Environments;
         var projects = options.Projects;

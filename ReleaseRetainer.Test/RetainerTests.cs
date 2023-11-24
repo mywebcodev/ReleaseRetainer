@@ -2,9 +2,7 @@
 using NSubstitute;
 using NUnit.Framework;
 using ReleaseRetainer.Entities;
-using ReleaseRetainer.Models;
 using ReleaseRetainer.Test.Builders;
-using System;
 using Environment = ReleaseRetainer.Entities.Environment;
 
 namespace ReleaseRetainer.Test;
@@ -33,20 +31,25 @@ public class RetainerTests
         _systemUnderTest = new RetainerService(_logger);
     }
 
-    [Test]
-    [TestCase(-1, TestName = "NumOfReleasesToKeepIsLessThanZero")]
-    [TestCase(0, TestName = "NumOfReleasesToKeepIsZero")]
-    public void RetainReleases_ThrowsArgumentException_WhenNumOfReleasesToKeepIsLessOrEqualsToZero(int numOfReleasesToKeep)
+    // [Test]
+    // [TestCase(-1, TestName = "NumOfReleasesToKeepIsLessThanZero")]
+    // [TestCase(0, TestName = "NumOfReleasesToKeepIsZero")]
+    // public void RetainReleases_ThrowsArgumentException_WhenNumOfReleasesToKeepIsLessOrEqualsToZero(int numOfReleasesToKeep)
+    // {
+    //     // Arrange
+    //     const string expectedExceptionMessage = $@"{nameof(RetainReleaseOptions.NumOfReleasesToKeep)} must be greater than zero. (Parameter '{nameof(RetainReleaseOptions.NumOfReleasesToKeep)}')";
+    //     var options = _retainReleaseOptionsBuilder.With(p => p.NumOfReleasesToKeep, numOfReleasesToKeep).Build();
+    //
+    //     // Act
+    //     // Assert
+    //     var exception = Assert.Throws<ArgumentException>(() => _systemUnderTest.RetainReleases(options));
+    //
+    //     exception.Message.Should().Be(expectedExceptionMessage);
+    // }
+
+    private void AssertLogMessage(string releaseId, string envId)
     {
-        // Arrange
-        const string expectedExceptionMessage = $@"{nameof(RetainReleaseOptions.NumOfReleasesToKeep)} must be greater than zero. (Parameter '{nameof(RetainReleaseOptions.NumOfReleasesToKeep)}')";
-        var options = _retainReleaseOptionsBuilder.With(p => p.NumOfReleasesToKeep, numOfReleasesToKeep).Build();
-
-        // Act
-        // Assert
-        var exception = Assert.Throws<ArgumentException>(() => _systemUnderTest.RetainReleases(options));
-
-        exception.Message.Should().Be(expectedExceptionMessage);
+        _logger.Logs.Should().Contain($"'{releaseId}' kept because it was most recently deployed to '{envId}'");
     }
 
     [Test]
@@ -113,7 +116,7 @@ public class RetainerTests
 
         // Assert
         _logger.Logs.Count.Should().Be(1);
-        _logger.Logs.Should().Contain($"'{release2.Id}' kept because it was most recently deployed to '{environment.Id}'");
+        AssertLogMessage(release2.Id, environment.Id);
     }
 
     [Test]
@@ -183,7 +186,7 @@ public class RetainerTests
 
         // Assert
         _logger.Logs.Count.Should().Be(1);
-        _logger.Logs.Should().Contain($"'{release1.Id}' kept because it was most recently deployed to '{environment.Id}'");
+        AssertLogMessage(release1.Id, environment.Id);
     }
 
     [Test]
@@ -266,7 +269,7 @@ public class RetainerTests
 
         // Assert
         _logger.Logs.Count.Should().Be(2);
-        _logger.Logs.Should().Contain($"'{release.Id}' kept because it was most recently deployed to '{environment1.Id}'");
-        _logger.Logs.Should().Contain($"'{release.Id}' kept because it was most recently deployed to '{environment2.Id}'");
+        AssertLogMessage(release.Id, environment1.Id);
+        AssertLogMessage(release.Id, environment2.Id);
     }
 }

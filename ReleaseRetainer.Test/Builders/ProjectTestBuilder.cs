@@ -2,26 +2,13 @@
 
 namespace ReleaseRetainer.Test.Builders;
 
-public record ProjectTestBuilder
+public class ProjectTestBuilder : GenericTestBuilder<Project>
 {
-    private Project _project = new();
-
-    public ProjectTestBuilder WithId(string id)
+    public override ProjectTestBuilder CreateRandom()
     {
-        _project.Id = id;
+        Instance.Id = $"Project-{Guid.NewGuid()}";
+        Instance.Name = $"Name-{Guid.NewGuid()}";
+
         return this;
-    }
-
-    public ProjectTestBuilder WithName(string name)
-    {
-        _project.Name = name;
-        return this;
-    }
-
-    public Project Build()
-    {
-        var builtProject = _project;
-        _project = new Project();
-        return builtProject;
     }
 }

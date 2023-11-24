@@ -1,26 +1,16 @@
-﻿namespace ReleaseRetainer.Test.Builders;
+﻿using ReleaseRetainer.Test.Helpers;
+
+namespace ReleaseRetainer.Test.Builders;
+
 using Environment = Entities.Environment;
 
-public record EnvironmentTestBuilder
+public class EnvironmentTestBuilder : GenericTestBuilder<Environment>
 {
-    private Environment _environment = new ();
-
-    public EnvironmentTestBuilder WithId(string id)
+    public override EnvironmentTestBuilder CreateRandom()
     {
-        _environment.Id = id;
+        Instance.Id = $"Environment-{Guid.NewGuid()}";
+        Instance.Name = $"Name-{TestDataGenerator.GetRandomNumber(1, 100)}";
+
         return this;
-    }
-
-    public EnvironmentTestBuilder WithName(string name)
-    {
-        _environment.Name = name;
-        return this;
-    }
-
-    public Environment Build()
-    {
-        var builtEnvironment = _environment;
-        _environment = new Environment();
-        return builtEnvironment;
     }
 }

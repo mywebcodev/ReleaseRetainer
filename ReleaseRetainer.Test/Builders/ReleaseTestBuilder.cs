@@ -1,39 +1,17 @@
 ﻿using ReleaseRetainer.Entities;
+using ReleaseRetainer.Test.Helpers;
 
 namespace ReleaseRetainer.Test.Builders;
 
-public record ReleaseTestBuilder
+public class ReleaseTestBuilder : GenericTestBuilder<Release>
 {
-    private Release _release = new ();
-
-    public ReleaseTestBuilder WithId(string id)
+    public override ReleaseTestBuilder CreateRandom()
     {
-        _release.Id = id;
+        Instance.Id = $"Release-{Guid.NewGuid()}";
+        Instance.ProjectId = $"ProjectId-{Guid.NewGuid()}";
+        Instance.Version = $"{TestDataGenerator.GetRandomNumber(1, 100)}.{TestDataGenerator.GetRandomNumber(1, 100)}.{TestDataGenerator.GetRandomNumber(1, 100)}";
+        Instance.Created = DateTime.UtcNow.AddHours(TestDataGenerator.GetRandomNumber(-24, 24));
+
         return this;
-    }
-
-    public ReleaseTestBuilder WithProjectId(string projectId)
-    {
-        _release.ProjectId = projectId;
-        return this;
-    }
-
-    public ReleaseTestBuilder WithVersion(string version)
-    {
-        _release.Version = version;
-        return this;
-    }
-
-    public ReleaseTestBuilder WithCreated(DateTime created)
-    {
-        _release.Created = created;
-        return this;
-    }
-
-    public Release Build()
-    {
-        var builtRelease = _release;
-        _release = new Release();
-        return builtRelease;
     }
 }

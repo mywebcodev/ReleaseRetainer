@@ -1,39 +1,17 @@
 ﻿using ReleaseRetainer.Entities;
+using ReleaseRetainer.Test.Helpers;
 
 namespace ReleaseRetainer.Test.Builders;
 
-public record DeploymentTestBuilder
+public class DeploymentTestBuilder : GenericTestBuilder<Deployment>
 {
-    private Deployment _deployment = new();
-
-    public DeploymentTestBuilder WithId(string id)
+    public override DeploymentTestBuilder CreateRandom()
     {
-        _deployment.Id = id;
+        Instance.Id = $"Deployment-{Guid.NewGuid()}";
+        Instance.ReleaseId = $"Release-{Guid.NewGuid()}";
+        Instance.EnvironmentId = $"Environment-{Guid.NewGuid()}";
+        Instance.DeployedAt = DateTime.UtcNow.AddHours(TestDataGenerator.GetRandomNumber(-24, 24));
+
         return this;
-    }
-
-    public DeploymentTestBuilder WithReleaseId(string releaseId)
-    {
-        _deployment.ReleaseId = releaseId;
-        return this;
-    }
-
-    public DeploymentTestBuilder WithEnvironmentId(string environmentId)
-    {
-        _deployment.EnvironmentId = environmentId;
-        return this;
-    }
-
-    public DeploymentTestBuilder WithDeployedAt(DateTime deployedAt)
-    {
-        _deployment.DeployedAt = deployedAt;
-        return this;
-    }
-
-    public Deployment Build()
-    {
-        var builtDeployment = _deployment;
-        _deployment = new Deployment();
-        return builtDeployment;
     }
 }

@@ -61,12 +61,12 @@ public class RetainerService(ILogger<RetainerService> logger) : IRetainerService
                 var retainedProjectReleases = releasesByProjectIdLookup[project.Id]
                                               // Filter releases that have deployments in the current environment
                                               .Where(r => releaseDeploymentsPerEnvironment.ContainsKey((r.Id, environment.Id)))
-                                              // Use DistinctBy to avoid duplicated releases based on their Id
-                                              .DistinctBy(r => r.Id)
                                               // Order releases by the most recent deployment in the current environment,
                                               .OrderByDescending(r => releaseDeploymentsPerEnvironment[(r.Id, environment.Id)].First().DeployedAt)
                                               // then by the release creation date in descending order
                                               .ThenByDescending(r => r.Created)
+                                              // Use DistinctBy to avoid duplicated releases based on their Id
+                                              .DistinctBy(r => r.Id)
                                               // Take the specified number of releases to retain
                                               .Take(numOfReleasesToKeep);
 

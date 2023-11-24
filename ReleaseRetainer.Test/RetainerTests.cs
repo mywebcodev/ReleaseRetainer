@@ -1,9 +1,9 @@
-﻿using AutoFixture;
-using FluentAssertions;
+﻿using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
 using ReleaseRetainer.Entities;
 using ReleaseRetainer.Models;
+using ReleaseRetainer.Test.Builders;
 using Environment = ReleaseRetainer.Entities.Environment;
 
 namespace ReleaseRetainer.Test;
@@ -13,12 +13,21 @@ public class RetainerTests
 {
     private RetainerService _systemUnderTest;
     private MockLogger<RetainerService> _logger;
-    private Fixture _fixture;
+    private DeploymentTestBuilder _deploymentBuilder;
+    private EnvironmentTestBuilder _environmentBuilder;
+    private ProjectTestBuilder _projectBuilder;
+    private ReleaseTestBuilder _releaseBuilder;
+    private RetainReleaseOptionsTestBuilder _retainReleaseOptionsBuilder;
+    private readonly DateTime _utcNow = DateTime.UtcNow;
 
     [SetUp]
     public void SetUp()
     {
-        _fixture = new Fixture();
+        _retainReleaseOptionsBuilder = new RetainReleaseOptionsTestBuilder();
+        _deploymentBuilder = new DeploymentTestBuilder();
+        _environmentBuilder = new EnvironmentTestBuilder();
+        _projectBuilder = new ProjectTestBuilder();
+        _releaseBuilder = new ReleaseTestBuilder();
         _logger = Substitute.For<MockLogger<RetainerService>>();
         _systemUnderTest = new RetainerService(_logger);
     }
@@ -30,14 +39,12 @@ public class RetainerTests
     {
         // Arrange
         const string expectedExceptionMessage = $@"{nameof(RetainReleaseOptions.NumOfReleasesToKeep)} must be greater than zero. (Parameter '{nameof(RetainReleaseOptions.NumOfReleasesToKeep)}')";
-        var options = _fixture.Build<RetainReleaseOptions>()
-                              .With(p => p.NumOfReleasesToKeep, numOfReleasesToKeep)
-                              .Create();
-
+        var options = _retainReleaseOptionsBuilder.WithNumOfReleasesToKeep(numOfReleasesToKeep).Build();
+    
         // Act
         // Assert
         var exception = Assert.Throws<ArgumentException>(() => _systemUnderTest.RetainReleases(options));
-
+    
         exception.Message.Should().Be(expectedExceptionMessage);
     }
 
@@ -45,59 +52,65 @@ public class RetainerTests
     public void RetainReleases_KeepsReleaseWithSameDeploymentTime_ToTheSameEnvironment()
     {
         // Arrange
-        var now = DateTime.UtcNow;
+        var project = _projectBuilder
+                      .WithId("Project-1")
+                      .WithName("Random Quotes")
+                      .Build();
+
+        var release1 = _releaseBuilder
+                       .WithId("Release-1")
+                       .WithProjectId(project.Id)
+                       .WithVersion("1.0.0")
+                       .WithCreated(_utcNow)
+                       .Build();
+        var release2 = _releaseBuilder
+                       .WithId("Release-2")
+                       .WithProjectId(project.Id)
+                       .WithVersion("1.0.1")
+                       .WithCreated(_utcNow.AddHours(1))
+                       .Build();
+
+        var environment = _environmentBuilder
+                          .WithId("Environment-1")
+                          .WithName("Staging")
+                          .Build();
+
+        var deployment1 = _deploymentBuilder
+                          .WithId("Deployment-1")
+                          .WithReleaseId(release2.Id)
+                          .WithEnvironmentId(environment.Id)
+                          .WithDeployedAt(_utcNow)
+                          .Build();
+        var deployment2 = _deploymentBuilder
+                          .WithId("Deployment-2")
+                          .WithReleaseId(release1.Id)
+                          .WithEnvironmentId(environment.Id)
+                          .WithDeployedAt(_utcNow)
+                          .Build();
+
         var deployments = new List<Deployment>
         {
-            new()
-            {
-                Id = "Deployment-2",
-                ReleaseId = "Release-1",
-                EnvironmentId = "Environment-1",
-                DeployedAt = now
-            },
-            new()
-            {
-                Id = "Deployment-1",
-                ReleaseId = "Release-2",
-                EnvironmentId = "Environment-1",
-                DeployedAt = now
-            }
+            deployment1,
+            deployment2
         };
 
         var environments = new List<Environment>
         {
-            new()
-            {
-                Id = "Environment-1",
-                Name = "Staging"
-            }
+            environment
         };
 
         var releases = new List<Release>
         {
-            new()
-            {
-                Id = "Release-1",
-                ProjectId = "Project-1",
-                Version = "1.0.0",
-                Created = now
-            },
-            new()
-            {
-                Id = "Release-2",
-                ProjectId = "Project-1",
-                Version = "1.0.1",
-                Created = now.AddHours(1),
-            }
+            release1,
+            release2
         };
 
         var projects = new List<Project>
         {
-            new()
-            {
-                Id = "Project-1",
-                Name = "Random Quotes"
-            }
+            _projectBuilder
+                .WithId("Project-1")
+                .WithName("Random Quotes")
+                .Build()
         };
 
         var options = new RetainReleaseOptions
@@ -121,59 +134,65 @@ public class RetainerTests
     public void RetainReleases_KeepsReleaseWithDifferentDeploymentTime_ToTheSameEnvironment()
     {
         // Arrange
+        var project = _projectBuilder
+                      .WithId("Project-1")
+                      .WithName("Random Quotes")
+                      .Build();
+
+        var release1 = _releaseBuilder
+                       .WithId("Release-1")
+                       .WithProjectId(project.Id)
+                       .WithVersion("1.0.0")
+                       .WithCreated(_utcNow)
+                       .Build();
+        var release2 = _releaseBuilder
+                       .WithId("Release-2")
+                       .WithProjectId(project.Id)
+                       .WithVersion("1.0.1")
+                       .WithCreated(_utcNow.AddHours(1))
+                       .Build();
+
+        var environment = _environmentBuilder
+                          .WithId("Environment-1")
+                          .WithName("Staging")
+                          .Build();
+
+        var deployment1 = _deploymentBuilder
+                          .WithId("Deployment-1")
+                          .WithReleaseId(release2.Id)
+                          .WithEnvironmentId(environment.Id)
+                          .WithDeployedAt(_utcNow)
+                          .Build();
+        var deployment2 = _deploymentBuilder
+                          .WithId("Deployment-2")
+                          .WithReleaseId(release1.Id)
+                          .WithEnvironmentId(environment.Id)
+                          .WithDeployedAt(_utcNow.AddHours(1))
+                          .Build();
+
         var deployments = new List<Deployment>
         {
-            new()
-            {
-                Id = "Deployment-2",
-                ReleaseId = "Release-1",
-                EnvironmentId = "Environment-1",
-                DeployedAt = DateTime.Parse("2000-01-01T11:00:00")
-            },
-            new()
-            {
-                Id = "Deployment-1",
-                ReleaseId = "Release-1",
-                EnvironmentId = "Environment-1",
-                DeployedAt = DateTime.Parse("2000-01-01T10:00:00")
-            }
+            deployment1,
+            deployment2
         };
 
         var environments = new List<Environment>
         {
-            new()
-            {
-                Id = "Environment-1",
-                Name = "Staging"
-            }
+            environment
         };
-
 
         var releases = new List<Release>
         {
-            new()
-            {
-                Id = "Release-2",
-                ProjectId = "Project-1",
-                Version = "1.0.1",
-                Created = DateTime.Parse("2000-01-01T09:00:00"),
-            },
-            new()
-            {
-                Id = "Release-1",
-                ProjectId = "Project-1",
-                Version = "1.0.0",
-                Created = DateTime.Parse("2000-01-01T08:00:00")
-            }
+            release1,
+            release2
         };
 
         var projects = new List<Project>
         {
-            new()
-            {
-                Id = "Project-1",
-                Name = "Random Quotes"
-            }
+            _projectBuilder
+                .WithId("Project-1")
+                .WithName("Random Quotes")
+                .Build()
         };
 
         var options = new RetainReleaseOptions
@@ -196,70 +215,74 @@ public class RetainerTests
     public void RetainReleases_KeepsReleasesWithSameId_ForDifferentProjectAndEnvironmentCombinations()
     {
         // Arrange
+        var project = _projectBuilder
+                      .WithId("Project-1")
+                      .WithName("Random Quotes")
+                      .Build();
+
+        var release1 = _releaseBuilder
+                       .WithId("Release-1")
+                       .WithProjectId(project.Id)
+                       .WithVersion("1.0.0")
+                       .WithCreated(_utcNow)
+                       .Build();
+
+        var environment1 = _environmentBuilder
+                          .WithId("Environment-1")
+                          .WithName("Staging")
+                          .Build();
+        var environment2 = _environmentBuilder
+                           .WithId("Environment-2")
+                           .WithName("Production")
+                           .Build();
+
+        var deployment1 = _deploymentBuilder
+                          .WithId("Deployment-1")
+                          .WithReleaseId(release1.Id)
+                          .WithEnvironmentId(environment1.Id)
+                          .WithDeployedAt(_utcNow)
+                          .Build();
+        var deployment2 = _deploymentBuilder
+                          .WithId("Deployment-2")
+                          .WithReleaseId(release1.Id)
+                          .WithEnvironmentId(environment1.Id)
+                          .WithDeployedAt(_utcNow.AddHours(1))
+                          .Build();
+        var deployment3 = _deploymentBuilder
+                          .WithId("Deployment-3")
+                          .WithReleaseId(release1.Id)
+                          .WithEnvironmentId(environment2.Id)
+                          .WithDeployedAt(_utcNow)
+                          .Build();
+        var deployment4 = _deploymentBuilder
+                          .WithId("Deployment-4")
+                          .WithReleaseId(release1.Id)
+                          .WithEnvironmentId(environment2.Id)
+                          .WithDeployedAt(_utcNow.AddHours(1))
+                          .Build();
+
         var deployments = new List<Deployment>
         {
-            new()
-            {
-                Id = "Deployment-1",
-                ReleaseId = "Release-1",
-                EnvironmentId = "Environment-1",
-                DeployedAt = DateTime.UtcNow
-            },
-            new()
-            {
-                Id = "Deployment-2",
-                ReleaseId = "Release-1",
-                EnvironmentId = "Environment-1",
-                DeployedAt = DateTime.UtcNow.AddHours(2)
-            },
-            new()
-            {
-                Id = "Deployment-3",
-                ReleaseId = "Release-1",
-                EnvironmentId = "Environment-2",
-                DeployedAt = DateTime.UtcNow
-            },
-            new()
-            {
-                Id = "Deployment-4",
-                ReleaseId = "Release-1",
-                EnvironmentId = "Environment-2",
-                DeployedAt = DateTime.UtcNow.AddHours(3)
-            }
+            deployment1,
+            deployment2,
+            deployment4,
+            deployment3
         };
 
         var environments = new List<Environment>
         {
-            new()
-            {
-                Id = "Environment-1",
-                Name = "Staging"
-            },
-            new()
-            {
-                Id = "Environment-2",
-                Name = "Production"
-            }
+            environment1,
+            environment2
         };
 
         var releases = new List<Release>
         {
-            new()
-            {
-                Id = "Release-1",
-                ProjectId = "Project-1",
-                Version = "1.0.0",
-                Created = DateTime.UtcNow
-            }
+            release1
         };
 
         var projects = new List<Project>
         {
-            new()
-            {
-                Id = "Project-1",
-                Name = "Random Quotes"
-            }
+            project
         };
 
         var options = new RetainReleaseOptions

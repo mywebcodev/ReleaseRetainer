@@ -5,9 +5,9 @@ namespace ReleaseRetainer.Models;
 
 public record RetainReleaseOptions
 {
-    public required IEnumerable<Deployment> Deployments { get; init; }
-    public required IEnumerable<Environment> Environments { get; init; }
-    public required IEnumerable<Project> Projects { get; init; }
-    public required IEnumerable<Release> Releases { get; init; }
-    public required int NumOfReleasesToKeep { get; init; }
+    public IEnumerable<Deployment> Deployments { get; set; }
+    public IEnumerable<Environment> Environments { get; set; }
+    public IEnumerable<Project> Projects { get; set; }
+    public IEnumerable<Release> Releases { get; set; }
+    public int NumOfReleasesToKeep { get; set; }
 }

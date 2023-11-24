@@ -193,9 +193,9 @@ public class RetainerTests
         var project = _projectBuilder.CreateRandom().Build();
 
         var release = _releaseBuilder
-                       .CreateRandom()
-                       .With(p => p.ProjectId, project.Id)
-                       .Build();
+                      .CreateRandom()
+                      .With(p => p.ProjectId, project.Id)
+                      .Build();
 
         var environment1 = _environmentBuilder
                            .CreateRandom()

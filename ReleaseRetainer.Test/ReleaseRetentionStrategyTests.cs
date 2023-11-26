@@ -428,7 +428,65 @@ public class ReleaseRetentionStrategyTests
         _logger.Logs.Count.Should().Be(0);
     }
 
-        [Test]
+    [Test]
+    public void ShouldNotThrowException_WhenDeploymentWithoutEnvironment()
+    {
+        // Arrange
+        var project = ProjectBuilder.CreateRandom().Build();
+
+        var release =  ReleaseBuilder
+                      .CreateRandom()
+                      .With(p => p.ProjectId, project.Id)
+                      .Build();
+
+        var environment = EnvironmentBuilder
+                           .CreateRandom()
+                           .Build();
+
+        var deployment1 = DeploymentBuilder
+                          .With(p => p.Id, "Deployment-1")
+                          .With(p => p.ReleaseId, release.Id)
+                          .With(p => p.EnvironmentId, null)
+                          .With(p => p.DeployedAt, UtcNow)
+                          .Build();
+
+        var deployments = new List<Deployment>
+        {
+            deployment1
+        };
+
+        var environments = new List<Environment>
+        {
+            environment
+        };
+
+        var releases = new List<Release>
+        {
+            release
+        };
+
+        var projects = new List<Project>
+        {
+            project
+        };
+
+        var options = RetainReleaseOptionsBuilder
+                      .With(p => p.Deployments, deployments)
+                      .With(p => p.Environments, environments)
+                      .With(p => p.Projects, projects)
+                      .With(p => p.Releases, releases)
+                      .With(p => p.NumOfReleasesToKeep, 5)
+                      .Build();
+
+        // Act
+        var result = _systemUnderTest.RetainReleases(options);
+
+        // Assert
+        result.Should().BeEmpty();
+        _logger.Logs.Count.Should().Be(0);
+    }
+
+    [Test]
     public void ShouldRetainAllReleasesInProjectAndEnvironment_WhenProjectsWithFewerReleasesThanNumOfReleasesToKeep()
     {
         // Arrange

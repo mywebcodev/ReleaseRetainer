@@ -2,7 +2,7 @@
 using ReleaseRetainer.Entities;
 using ReleaseRetainer.Models;
 
-namespace ReleaseRetainer.Criteria;
+namespace ReleaseRetainer.Strategies;
 
 public interface IReleaseRetentionStrategy
 {

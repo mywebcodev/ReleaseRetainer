@@ -1,6 +1,6 @@
 ﻿using NSubstitute;
 using NUnit.Framework;
-using ReleaseRetainer.Criteria;
+using ReleaseRetainer.Strategies;
 using ReleaseRetainer.Test.Builders;
 
 namespace ReleaseRetainer.Test.UnitTests;

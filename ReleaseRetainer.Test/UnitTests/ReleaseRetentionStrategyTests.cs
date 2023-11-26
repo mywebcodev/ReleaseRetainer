@@ -1,9 +1,9 @@
 ﻿using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
-using ReleaseRetainer.Criteria;
 using ReleaseRetainer.Entities;
 using ReleaseRetainer.Models;
+using ReleaseRetainer.Strategies;
 using ReleaseRetainer.Test.Builders;
 using ReleaseRetainer.Test.Mocks;
 using Environment = ReleaseRetainer.Entities.Environment;

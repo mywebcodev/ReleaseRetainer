@@ -1,6 +1,6 @@
-﻿using ReleaseRetainer.Criteria;
-using ReleaseRetainer.Entities;
+﻿using ReleaseRetainer.Entities;
 using ReleaseRetainer.Models;
+using ReleaseRetainer.Strategies;
 
 namespace ReleaseRetainer;
 

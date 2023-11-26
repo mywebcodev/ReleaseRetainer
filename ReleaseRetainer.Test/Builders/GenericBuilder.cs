@@ -2,13 +2,13 @@
 
 namespace ReleaseRetainer.Test.Builders;
 
-public abstract class GenericTestBuilder<T> where T : new()
+public abstract class GenericBuilder<T> where T : new()
 {
     protected T Instance = new();
 
-    public abstract GenericTestBuilder<T> CreateRandom();
+    public abstract GenericBuilder<T> CreateRandom();
 
-    public GenericTestBuilder<T> With<TProperty>(Expression<Func<T, TProperty>> propertyPicker, TProperty value)
+    public GenericBuilder<T> With<TProperty>(Expression<Func<T, TProperty>> propertyPicker, TProperty value)
     {
         if (propertyPicker.Body is not MemberExpression memberExpression)
         {

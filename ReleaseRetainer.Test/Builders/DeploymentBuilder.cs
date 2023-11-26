@@ -3,9 +3,9 @@ using ReleaseRetainer.Test.Helpers;
 
 namespace ReleaseRetainer.Test.Builders;
 
-public class DeploymentTestBuilder : GenericTestBuilder<Deployment>
+public class DeploymentBuilder : GenericBuilder<Deployment>
 {
-    public override DeploymentTestBuilder CreateRandom()
+    public override DeploymentBuilder CreateRandom()
     {
         Instance.Id = $"Deployment-{Guid.NewGuid()}";
         Instance.ReleaseId = $"Release-{Guid.NewGuid()}";

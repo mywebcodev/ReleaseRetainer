@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace ReleaseRetainer.Test;
+namespace ReleaseRetainer.Test.Mocks;
 
 // https://github.com/nsubstitute/NSubstitute/issues/597
 public abstract class MockLogger<T> : ILogger<T>
@@ -25,7 +25,7 @@ public abstract class MockLogger<T> : ILogger<T>
     public abstract void Log(LogLevel logLevel, IDictionary<string, object> state, Exception? exception = null);
 
     public abstract void LogInformation(string message, params object?[] args);
-    
+
     public virtual bool IsEnabled(LogLevel logLevel)
     {
         return true;

@@ -5,6 +5,7 @@ using ReleaseRetainer.Criteria;
 using ReleaseRetainer.Entities;
 using ReleaseRetainer.Models;
 using ReleaseRetainer.Test.Builders;
+using ReleaseRetainer.Test.Mocks;
 using Environment = ReleaseRetainer.Entities.Environment;
 
 namespace ReleaseRetainer.Test;
@@ -14,11 +15,11 @@ public class ReleaseRetentionStrategyTests
 {
     private ReleaseRetentionStrategy _systemUnderTest;
     private MockLogger<ReleaseRetentionStrategy> _logger;
-    private static readonly DeploymentTestBuilder DeploymentBuilder = new();
-    private static readonly EnvironmentTestBuilder EnvironmentBuilder = new();
-    private static readonly ProjectTestBuilder ProjectBuilder = new();
-    private static readonly ReleaseTestBuilder ReleaseBuilder = new();
-    private static readonly RetainReleaseOptionsTestBuilder RetainReleaseOptionsBuilder = new ();
+    private static readonly DeploymentBuilder DeploymentBuilder = new();
+    private static readonly EnvironmentBuilder EnvironmentBuilder = new();
+    private static readonly ProjectBuilder ProjectBuilder = new();
+    private static readonly ReleaseBuilder ReleaseBuilder = new();
+    private static readonly RetainReleaseOptionsBuilder RetainReleaseOptionsBuilder = new ();
     private static readonly DateTime UtcNow = DateTime.UtcNow;
 
     [SetUp]
@@ -27,22 +28,6 @@ public class ReleaseRetentionStrategyTests
         _logger = Substitute.For<MockLogger<ReleaseRetentionStrategy>>();
         _systemUnderTest = new ReleaseRetentionStrategy(_logger);
     }
-
-    // [Test]
-    // [TestCase(-1, TestName = "NumOfReleasesToKeepIsLessThanZero")]
-    // [TestCase(0, TestName = "NumOfReleasesToKeepIsZero")]
-    // public void RetainReleases_ThrowsArgumentException_WhenNumOfReleasesToKeepIsLessOrEqualsToZero(int numOfReleasesToKeep)
-    // {
-    //     // Arrange
-    //     const string expectedExceptionMessage = $@"{nameof(RetainReleaseOptions.NumOfReleasesToKeep)} must be greater than zero. (Parameter '{nameof(RetainReleaseOptions.NumOfReleasesToKeep)}')";
-    //     var options = _retainReleaseOptionsBuilder.With(p => p.NumOfReleasesToKeep, numOfReleasesToKeep).Build();
-    //
-    //     // Act
-    //     // Assert
-    //     var exception = Assert.Throws<ArgumentException>(() => _systemUnderTest.RetainReleases(options));
-    //
-    //     exception.Message.Should().Be(expectedExceptionMessage);
-    // }
 
     private void AssertLogMessage(string releaseId, string envId)
     {

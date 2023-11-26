@@ -2,9 +2,9 @@
 
 namespace ReleaseRetainer.Test.Builders;
 
-public class ProjectTestBuilder : GenericTestBuilder<Project>
+public class ProjectBuilder : GenericBuilder<Project>
 {
-    public override ProjectTestBuilder CreateRandom()
+    public override ProjectBuilder CreateRandom()
     {
         Instance.Id = $"Project-{Guid.NewGuid()}";
         Instance.Name = $"Name-{Guid.NewGuid()}";

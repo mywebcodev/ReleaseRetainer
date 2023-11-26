@@ -3,7 +3,7 @@ using NUnit.Framework;
 using ReleaseRetainer.Models;
 using ReleaseRetainer.Test.Builders;
 
-namespace ReleaseRetainer.Test;
+namespace ReleaseRetainer.Test.UnitTests;
 
 [TestFixture]
 public class RetainReleaseOptionsTests
@@ -19,28 +19,32 @@ public class RetainReleaseOptionsTests
                 options.Deployments = null;
             },
 
-            $@"{nameof(RetainReleaseOptions.Deployments)} list cannot be null. (Parameter '{nameof(RetainReleaseOptions.Deployments)}')") {TestName = "NullDeployments"};
+            $@"{nameof(RetainReleaseOptions.Deployments)} list cannot be null. (Parameter '{nameof(RetainReleaseOptions.Deployments)}')")
+        { TestName = "NullDeployments" };
         yield return new TestCaseData(
             () =>
             {
                 var options = RetainReleaseOptionsBuilder.CreateRandom().Build();
                 options.Environments = null;
             },
-            $@"{nameof(RetainReleaseOptions.Environments)} list cannot be null. (Parameter '{nameof(RetainReleaseOptions.Environments)}')") {TestName = "NullEnvironments"};
+            $@"{nameof(RetainReleaseOptions.Environments)} list cannot be null. (Parameter '{nameof(RetainReleaseOptions.Environments)}')")
+        { TestName = "NullEnvironments" };
         yield return new TestCaseData(
             () =>
             {
                 var options = RetainReleaseOptionsBuilder.CreateRandom().Build();
                 options.Projects = null;
             },
-            $@"{nameof(RetainReleaseOptions.Projects)} list cannot be null. (Parameter '{nameof(RetainReleaseOptions.Projects)}')") {TestName = "NullProjects"};
+            $@"{nameof(RetainReleaseOptions.Projects)} list cannot be null. (Parameter '{nameof(RetainReleaseOptions.Projects)}')")
+        { TestName = "NullProjects" };
         yield return new TestCaseData(
             () =>
             {
                 var options = RetainReleaseOptionsBuilder.CreateRandom().Build();
                 options.Releases = null;
             },
-            $@"{nameof(RetainReleaseOptions.Releases)} list cannot be null. (Parameter '{nameof(RetainReleaseOptions.Releases)}')") {TestName = "NullReleases"};
+            $@"{nameof(RetainReleaseOptions.Releases)} list cannot be null. (Parameter '{nameof(RetainReleaseOptions.Releases)}')")
+        { TestName = "NullReleases" };
     }
 
     [Test]

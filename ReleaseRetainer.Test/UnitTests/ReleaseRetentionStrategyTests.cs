@@ -8,7 +8,7 @@ using ReleaseRetainer.Test.Builders;
 using ReleaseRetainer.Test.Mocks;
 using Environment = ReleaseRetainer.Entities.Environment;
 
-namespace ReleaseRetainer.Test;
+namespace ReleaseRetainer.Test.UnitTests;
 
 [TestFixture]
 public class ReleaseRetentionStrategyTests
@@ -19,7 +19,7 @@ public class ReleaseRetentionStrategyTests
     private static readonly EnvironmentBuilder EnvironmentBuilder = new();
     private static readonly ProjectBuilder ProjectBuilder = new();
     private static readonly ReleaseBuilder ReleaseBuilder = new();
-    private static readonly RetainReleaseOptionsBuilder RetainReleaseOptionsBuilder = new ();
+    private static readonly RetainReleaseOptionsBuilder RetainReleaseOptionsBuilder = new();
     private static readonly DateTime UtcNow = DateTime.UtcNow;
 
     [SetUp]
@@ -79,31 +79,35 @@ public class ReleaseRetentionStrategyTests
                                       .With(p => p.Projects, projects)
                                       .With(p => p.Releases, releases)
                                       .With(p => p.NumOfReleasesToKeep, 1)
-                                      .Build()) {TestName = "Deployments"};
+                                      .Build())
+        { TestName = "Deployments" };
         yield return new TestCaseData(RetainReleaseOptionsBuilder
                                       .With(p => p.Deployments, deployments)
                                       .With(p => p.Environments, Array.Empty<Environment>())
                                       .With(p => p.Projects, projects)
                                       .With(p => p.Releases, releases)
                                       .With(p => p.NumOfReleasesToKeep, 1)
-                                      .Build()) {TestName = "Environments"};
+                                      .Build())
+        { TestName = "Environments" };
         yield return new TestCaseData(RetainReleaseOptionsBuilder
                                       .With(p => p.Deployments, deployments)
                                       .With(p => p.Environments, environments)
                                       .With(p => p.Projects, Array.Empty<Project>())
                                       .With(p => p.Releases, releases)
                                       .With(p => p.NumOfReleasesToKeep, 1)
-                                      .Build()) {TestName = "Projects"};
+                                      .Build())
+        { TestName = "Projects" };
         yield return new TestCaseData(RetainReleaseOptionsBuilder
                                       .With(p => p.Deployments, deployments)
                                       .With(p => p.Environments, environments)
                                       .With(p => p.Projects, projects)
                                       .With(p => p.Releases, Array.Empty<Release>())
                                       .With(p => p.NumOfReleasesToKeep, 1)
-                                      .Build()) {TestName = "Release"};
+                                      .Build())
+        { TestName = "Release" };
     }
 
-        private static IEnumerable<TestCaseData> OrphanedReleasesTestCases()
+    private static IEnumerable<TestCaseData> OrphanedReleasesTestCases()
     {
         var project = ProjectBuilder.CreateRandom().Build();
 
@@ -133,7 +137,7 @@ public class ReleaseRetentionStrategyTests
         var releaseWithoutProject = ReleaseBuilder.CreateRandom()
                                                   .With(p => p.ProjectId, null)
                                                   .Build();
-   
+
         var deploymentForReleaseWithoutProject = DeploymentBuilder
                                              .CreateRandom()
                                              .With(p => p.ReleaseId, releaseWithoutProject.Id)
@@ -143,19 +147,21 @@ public class ReleaseRetentionStrategyTests
         var deploymentWithDifferentRelease = DeploymentBuilder.CreateRandom().Build();
 
         yield return new TestCaseData(RetainReleaseOptionsBuilder
-                                      .With(p => p.Deployments, new List<Deployment> {deploymentForReleaseWithoutProject})
+                                      .With(p => p.Deployments, new List<Deployment> { deploymentForReleaseWithoutProject })
                                       .With(p => p.Environments, environments)
                                       .With(p => p.Projects, projects)
-                                      .With(p => p.Releases, new List<Release> {releaseWithoutProject})
+                                      .With(p => p.Releases, new List<Release> { releaseWithoutProject })
                                       .With(p => p.NumOfReleasesToKeep, 1)
-                                      .Build()) {TestName = "ReleaseWithoutProject"};
+                                      .Build())
+        { TestName = "ReleaseWithoutProject" };
         yield return new TestCaseData(RetainReleaseOptionsBuilder
-                                      .With(p => p.Deployments, new List<Deployment> {deploymentWithDifferentRelease})
+                                      .With(p => p.Deployments, new List<Deployment> { deploymentWithDifferentRelease })
                                       .With(p => p.Environments, environments)
                                       .With(p => p.Projects, projects)
                                       .With(p => p.Releases, releases)
                                       .With(p => p.NumOfReleasesToKeep, 1)
-                                      .Build()) {TestName = "ReleaseWithoutDeployment"};
+                                      .Build())
+        { TestName = "ReleaseWithoutDeployment" };
     }
 
     [Test]
@@ -217,7 +223,7 @@ public class ReleaseRetentionStrategyTests
                       .With(p => p.NumOfReleasesToKeep, 1)
                       .Build();
 
-        var expectedResult = new [] {release2};
+        var expectedResult = new[] { release2 };
 
         // Act
         var result = _systemUnderTest.RetainReleases(options);
@@ -290,7 +296,7 @@ public class ReleaseRetentionStrategyTests
                       .With(p => p.NumOfReleasesToKeep, 1)
                       .Build();
 
-        var expectedResult = new [] {release1};
+        var expectedResult = new[] { release1 };
 
         // Act
         var result = _systemUnderTest.RetainReleases(options);
@@ -376,7 +382,7 @@ public class ReleaseRetentionStrategyTests
                       .With(p => p.NumOfReleasesToKeep, 1)
                       .Build();
 
-        var expectedResult = new [] {release, release};
+        var expectedResult = new[] { release, release };
 
         // Act
         var result = _systemUnderTest.RetainReleases(options);
@@ -419,7 +425,7 @@ public class ReleaseRetentionStrategyTests
         // Arrange
         var project = ProjectBuilder.CreateRandom().Build();
 
-        var release =  ReleaseBuilder
+        var release = ReleaseBuilder
                       .CreateRandom()
                       .With(p => p.ProjectId, project.Id)
                       .Build();
@@ -535,7 +541,7 @@ public class ReleaseRetentionStrategyTests
                       .With(p => p.NumOfReleasesToKeep, 5)
                       .Build();
 
-        var expectedResult = new [] {release1, release2};
+        var expectedResult = new[] { release1, release2 };
 
         // Act
         var result = _systemUnderTest.RetainReleases(options);

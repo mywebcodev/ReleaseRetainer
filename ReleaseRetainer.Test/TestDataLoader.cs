@@ -1,11 +1,11 @@
 ﻿using ReleaseRetainer.Entities;
-using ReleaseRetainer.Properties;
 using System.Text.Json;
+using ReleaseRetainer.Test.Properties;
 using Environment = ReleaseRetainer.Entities.Environment;
 
 namespace ReleaseRetainer;
 
-public class DataLoader
+public class TestDataLoader
 {
     private static Task<T?> DeserializeResourceAsync<T>(byte[] resource)
     {

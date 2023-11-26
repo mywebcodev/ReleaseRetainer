@@ -3,7 +3,7 @@ using NUnit.Framework;
 using ReleaseRetainer.Criteria;
 using ReleaseRetainer.Test.Builders;
 
-namespace ReleaseRetainer.Test;
+namespace ReleaseRetainer.Test.UnitTests;
 
 [TestFixture]
 public class RetainerServiceTests
@@ -23,12 +23,12 @@ public class RetainerServiceTests
     public void RetainReleases_ShouldCallReleaseRetentionStrategyRetainReleases()
     {
         // Arrange
-       var options = RetainReleaseOptionsBuilder.CreateRandom().Build();
+        var options = RetainReleaseOptionsBuilder.CreateRandom().Build();
 
-       // Act
-       _systemUnderTest.RetainReleases(options);
+        // Act
+        _systemUnderTest.RetainReleases(options);
 
-       // Assert
-       _releaseRetentionStrategy.Received(1).RetainReleases(options);
+        // Assert
+        _releaseRetentionStrategy.Received(1).RetainReleases(options);
     }
 }

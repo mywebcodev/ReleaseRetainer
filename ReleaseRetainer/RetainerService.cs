@@ -14,12 +14,12 @@ public interface IRetainerService
     /// </summary>
     /// <param name="options">Options specifying the Deployments, Environments, Projects, Releases and NumOfReleasesToKeep.</param>
     /// <returns>An IEnumerable of unique retained releases that have most recently been deployed.</returns>
-    IEnumerable<Release> RetainReleases(RetainReleaseOptions options);
+    IEnumerable<Release> RetainReleases(ReleaseRetainOptions options);
 }
 
 public class RetainerService(IReleaseRetentionStrategy releaseRetentionStrategy) : IRetainerService
 {
-    public IEnumerable<Release> RetainReleases(RetainReleaseOptions options)
+    public IEnumerable<Release> RetainReleases(ReleaseRetainOptions options)
     {
         return releaseRetentionStrategy.RetainReleases(options);
     }

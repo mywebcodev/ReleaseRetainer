@@ -3,7 +3,7 @@ using Environment = ReleaseRetainer.Entities.Environment;
 
 namespace ReleaseRetainer.Models;
 
-public record RetainReleaseOptions
+public record ReleaseRetainOptions
 {
     private IEnumerable<Deployment>? _deployments;
     private IEnumerable<Environment>? _environments;

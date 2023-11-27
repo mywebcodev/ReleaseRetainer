@@ -19,7 +19,7 @@ public class ReleaseRetentionStrategyTests
     private static readonly EnvironmentBuilder EnvironmentBuilder = new();
     private static readonly ProjectBuilder ProjectBuilder = new();
     private static readonly ReleaseBuilder ReleaseBuilder = new();
-    private static readonly RetainReleaseOptionsBuilder RetainReleaseOptionsBuilder = new();
+    private static readonly ReleaseRetainOptionsBuilder ReleaseRetainOptionsBuilder = new();
     private static readonly DateTime UtcNow = DateTime.UtcNow;
 
     [SetUp]
@@ -31,7 +31,7 @@ public class ReleaseRetentionStrategyTests
 
     private void AssertLogMessage(string releaseId, string envId)
     {
-        _logger.Logs.Should().Contain($"'{releaseId}' kept because it was most recently deployed to '{envId}'");
+        _logger.Logs.Should().Contain(Expectations.LogExpectations.CreateExpectedRetainedReleaseLogMessage(releaseId, envId));
     }
 
     private static IEnumerable<TestCaseData> EmptyCollectionsTestCases()
@@ -73,7 +73,7 @@ public class ReleaseRetentionStrategyTests
             project
         };
 
-        yield return new TestCaseData(RetainReleaseOptionsBuilder
+        yield return new TestCaseData(ReleaseRetainOptionsBuilder
                                       .With(p => p.Deployments, Array.Empty<Deployment>())
                                       .With(p => p.Environments, environments)
                                       .With(p => p.Projects, projects)
@@ -81,7 +81,7 @@ public class ReleaseRetentionStrategyTests
                                       .With(p => p.NumOfReleasesToKeep, 1)
                                       .Build())
         { TestName = "Deployments" };
-        yield return new TestCaseData(RetainReleaseOptionsBuilder
+        yield return new TestCaseData(ReleaseRetainOptionsBuilder
                                       .With(p => p.Deployments, deployments)
                                       .With(p => p.Environments, Array.Empty<Environment>())
                                       .With(p => p.Projects, projects)
@@ -89,7 +89,7 @@ public class ReleaseRetentionStrategyTests
                                       .With(p => p.NumOfReleasesToKeep, 1)
                                       .Build())
         { TestName = "Environments" };
-        yield return new TestCaseData(RetainReleaseOptionsBuilder
+        yield return new TestCaseData(ReleaseRetainOptionsBuilder
                                       .With(p => p.Deployments, deployments)
                                       .With(p => p.Environments, environments)
                                       .With(p => p.Projects, Array.Empty<Project>())
@@ -97,7 +97,7 @@ public class ReleaseRetentionStrategyTests
                                       .With(p => p.NumOfReleasesToKeep, 1)
                                       .Build())
         { TestName = "Projects" };
-        yield return new TestCaseData(RetainReleaseOptionsBuilder
+        yield return new TestCaseData(ReleaseRetainOptionsBuilder
                                       .With(p => p.Deployments, deployments)
                                       .With(p => p.Environments, environments)
                                       .With(p => p.Projects, projects)
@@ -146,7 +146,7 @@ public class ReleaseRetentionStrategyTests
 
         var deploymentWithDifferentRelease = DeploymentBuilder.CreateRandom().Build();
 
-        yield return new TestCaseData(RetainReleaseOptionsBuilder
+        yield return new TestCaseData(ReleaseRetainOptionsBuilder
                                       .With(p => p.Deployments, new List<Deployment> { deploymentForReleaseWithoutProject })
                                       .With(p => p.Environments, environments)
                                       .With(p => p.Projects, projects)
@@ -154,7 +154,7 @@ public class ReleaseRetentionStrategyTests
                                       .With(p => p.NumOfReleasesToKeep, 1)
                                       .Build())
         { TestName = "ReleaseWithoutProject" };
-        yield return new TestCaseData(RetainReleaseOptionsBuilder
+        yield return new TestCaseData(ReleaseRetainOptionsBuilder
                                       .With(p => p.Deployments, new List<Deployment> { deploymentWithDifferentRelease })
                                       .With(p => p.Environments, environments)
                                       .With(p => p.Projects, projects)
@@ -215,7 +215,7 @@ public class ReleaseRetentionStrategyTests
             project
         };
 
-        var options = RetainReleaseOptionsBuilder
+        var options = ReleaseRetainOptionsBuilder
                       .With(p => p.Deployments, deployments)
                       .With(p => p.Environments, environments)
                       .With(p => p.Projects, projects)
@@ -288,7 +288,7 @@ public class ReleaseRetentionStrategyTests
             project
         };
 
-        var options = RetainReleaseOptionsBuilder
+        var options = ReleaseRetainOptionsBuilder
                       .With(p => p.Deployments, deployments)
                       .With(p => p.Environments, environments)
                       .With(p => p.Projects, projects)
@@ -374,7 +374,7 @@ public class ReleaseRetentionStrategyTests
             project
         };
 
-        var options = RetainReleaseOptionsBuilder
+        var options = ReleaseRetainOptionsBuilder
                       .With(p => p.Deployments, deployments)
                       .With(p => p.Environments, environments)
                       .With(p => p.Projects, projects)
@@ -397,7 +397,7 @@ public class ReleaseRetentionStrategyTests
 
     [Test]
     [TestCaseSource(nameof(EmptyCollectionsTestCases))]
-    public void ShouldNotThrowException_WhenCollectionsAreEmpty(RetainReleaseOptions options)
+    public void ShouldNotThrowException_WhenCollectionsAreEmpty(ReleaseRetainOptions options)
     {
         // Act
         var result = _systemUnderTest.RetainReleases(options);
@@ -409,7 +409,7 @@ public class ReleaseRetentionStrategyTests
 
     [Test]
     [TestCaseSource(nameof(OrphanedReleasesTestCases))]
-    public void ShouldNotThrowException_WhenReleaseIsOrphaned(RetainReleaseOptions options)
+    public void ShouldNotThrowException_WhenReleaseIsOrphaned(ReleaseRetainOptions options)
     {
         // Act
         var result = _systemUnderTest.RetainReleases(options);
@@ -461,7 +461,7 @@ public class ReleaseRetentionStrategyTests
             project
         };
 
-        var options = RetainReleaseOptionsBuilder
+        var options = ReleaseRetainOptionsBuilder
                       .With(p => p.Deployments, deployments)
                       .With(p => p.Environments, environments)
                       .With(p => p.Projects, projects)
@@ -533,7 +533,7 @@ public class ReleaseRetentionStrategyTests
             project
         };
 
-        var options = RetainReleaseOptionsBuilder
+        var options = ReleaseRetainOptionsBuilder
                       .With(p => p.Deployments, deployments)
                       .With(p => p.Environments, environments)
                       .With(p => p.Projects, projects)

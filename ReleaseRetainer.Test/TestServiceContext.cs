@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.Logging.Debug;
 using ReleaseRetainer.Strategies;
+using ReleaseRetainer.Test.Mocks;
 
 namespace ReleaseRetainer.Test;
 
@@ -29,6 +30,7 @@ public class TestServiceContext
                     options.AddFilter<ConsoleLoggerProvider>(null /* category*/, LogLevel.Warning /* min level */);
                 });
 
+        services.AddSingleton<ILogger<ReleaseRetentionStrategy>, MockLogger<ReleaseRetentionStrategy>>();
         services.AddTransient<IRetainerService, RetainerService>();
         services.AddTransient<IReleaseRetentionStrategy, ReleaseRetentionStrategy>();
     }

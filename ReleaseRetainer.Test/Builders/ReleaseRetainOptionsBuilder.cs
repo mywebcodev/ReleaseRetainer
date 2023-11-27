@@ -6,9 +6,9 @@ namespace ReleaseRetainer.Test.Builders;
 
 using Environment = Entities.Environment;
 
-public class RetainReleaseOptionsBuilder : GenericBuilder<RetainReleaseOptions>
+public class ReleaseRetainOptionsBuilder : GenericBuilder<ReleaseRetainOptions>
 {
-    public override RetainReleaseOptionsBuilder CreateRandom()
+    public override ReleaseRetainOptionsBuilder CreateRandom()
     {
         Instance.Releases = new List<Release> {new ReleaseBuilder().CreateRandom().Build()};
         Instance.Environments = new List<Environment> {new EnvironmentBuilder().CreateRandom().Build()};

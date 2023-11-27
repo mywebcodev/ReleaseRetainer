@@ -8,42 +8,42 @@ namespace ReleaseRetainer.Test.UnitTests;
 [TestFixture]
 public class RetainReleaseOptionsTests
 {
-    private static readonly RetainReleaseOptionsBuilder RetainReleaseOptionsBuilder = new();
+    private static readonly ReleaseRetainOptionsBuilder ReleaseRetainOptionsBuilder = new();
 
     private static IEnumerable<TestCaseData> NullableCollectionsTestsCases()
     {
         yield return new TestCaseData(
             () =>
             {
-                var options = RetainReleaseOptionsBuilder.CreateRandom().Build();
+                var options = ReleaseRetainOptionsBuilder.CreateRandom().Build();
                 options.Deployments = null;
             },
 
-            $@"{nameof(RetainReleaseOptions.Deployments)} list cannot be null. (Parameter '{nameof(RetainReleaseOptions.Deployments)}')")
+            $@"{nameof(ReleaseRetainOptions.Deployments)} list cannot be null. (Parameter '{nameof(ReleaseRetainOptions.Deployments)}')")
         { TestName = "NullDeployments" };
         yield return new TestCaseData(
             () =>
             {
-                var options = RetainReleaseOptionsBuilder.CreateRandom().Build();
+                var options = ReleaseRetainOptionsBuilder.CreateRandom().Build();
                 options.Environments = null;
             },
-            $@"{nameof(RetainReleaseOptions.Environments)} list cannot be null. (Parameter '{nameof(RetainReleaseOptions.Environments)}')")
+            $@"{nameof(ReleaseRetainOptions.Environments)} list cannot be null. (Parameter '{nameof(ReleaseRetainOptions.Environments)}')")
         { TestName = "NullEnvironments" };
         yield return new TestCaseData(
             () =>
             {
-                var options = RetainReleaseOptionsBuilder.CreateRandom().Build();
+                var options = ReleaseRetainOptionsBuilder.CreateRandom().Build();
                 options.Projects = null;
             },
-            $@"{nameof(RetainReleaseOptions.Projects)} list cannot be null. (Parameter '{nameof(RetainReleaseOptions.Projects)}')")
+            $@"{nameof(ReleaseRetainOptions.Projects)} list cannot be null. (Parameter '{nameof(ReleaseRetainOptions.Projects)}')")
         { TestName = "NullProjects" };
         yield return new TestCaseData(
             () =>
             {
-                var options = RetainReleaseOptionsBuilder.CreateRandom().Build();
+                var options = ReleaseRetainOptionsBuilder.CreateRandom().Build();
                 options.Releases = null;
             },
-            $@"{nameof(RetainReleaseOptions.Releases)} list cannot be null. (Parameter '{nameof(RetainReleaseOptions.Releases)}')")
+            $@"{nameof(ReleaseRetainOptions.Releases)} list cannot be null. (Parameter '{nameof(ReleaseRetainOptions.Releases)}')")
         { TestName = "NullReleases" };
     }
 
@@ -53,8 +53,8 @@ public class RetainReleaseOptionsTests
     public void ThrowsArgumentException_WhenNumOfReleasesToKeepIsLessOrEqualsToZero(int numOfReleasesToKeep)
     {
         // Arrange
-        const string expectedExceptionMessage = $@"{nameof(RetainReleaseOptions.NumOfReleasesToKeep)} must be greater than zero. (Parameter '{nameof(RetainReleaseOptions.NumOfReleasesToKeep)}')";
-        var options = RetainReleaseOptionsBuilder.CreateRandom().Build();
+        const string expectedExceptionMessage = $@"{nameof(ReleaseRetainOptions.NumOfReleasesToKeep)} must be greater than zero. (Parameter '{nameof(ReleaseRetainOptions.NumOfReleasesToKeep)}')";
+        var options = ReleaseRetainOptionsBuilder.CreateRandom().Build();
 
         // Act
         // Assert

@@ -6,7 +6,7 @@ namespace ReleaseRetainer.Strategies;
 
 public interface IReleaseRetentionStrategy
 {
-    IEnumerable<Release> RetainReleases(RetainReleaseOptions options);
+    IEnumerable<Release> RetainReleases(ReleaseRetainOptions options);
 }
 
 // https://learn.microsoft.com/en-us/dotnet/core/extensions/logging-library-authors
@@ -41,7 +41,7 @@ public class ReleaseRetentionStrategy(ILogger<ReleaseRetentionStrategy> logger) 
     // For instance, a release with the same Id can be deployed within different projects or environments.
     // To avoid duplicates, an additional check is needed:
     // If a release with the same Id is already retained, skip retaining it.
-    public IEnumerable<Release> RetainReleases(RetainReleaseOptions options)
+    public IEnumerable<Release> RetainReleases(ReleaseRetainOptions options)
     {
         var releases = options.Releases;
         var deployments = options.Deployments;

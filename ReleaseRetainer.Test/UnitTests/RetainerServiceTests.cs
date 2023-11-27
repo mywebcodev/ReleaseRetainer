@@ -8,7 +8,7 @@ namespace ReleaseRetainer.Test.UnitTests;
 [TestFixture]
 public class RetainerServiceTests
 {
-    private static readonly RetainReleaseOptionsBuilder RetainReleaseOptionsBuilder = new();
+    private static readonly ReleaseRetainOptionsBuilder ReleaseRetainOptionsBuilder = new();
     private IReleaseRetentionStrategy _releaseRetentionStrategy;
     private RetainerService _systemUnderTest;
 
@@ -23,7 +23,7 @@ public class RetainerServiceTests
     public void RetainReleases_ShouldCallReleaseRetentionStrategyRetainReleases()
     {
         // Arrange
-        var options = RetainReleaseOptionsBuilder.CreateRandom().Build();
+        var options = ReleaseRetainOptionsBuilder.CreateRandom().Build();
 
         // Act
         _systemUnderTest.RetainReleases(options);

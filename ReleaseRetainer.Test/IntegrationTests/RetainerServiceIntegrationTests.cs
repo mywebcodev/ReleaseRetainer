@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
-using ReleaseRetainer.Entities;
+using ReleaseRetainer.Dtos;
 using ReleaseRetainer.Models;
 using ReleaseRetainer.Strategies;
 using ReleaseRetainer.Test.Builders;
@@ -67,7 +67,7 @@ public class RetainerServiceIntegrationTests
         var expectedRelease6 = options.Releases.First(r => r.Id == "Release-6");
         var expectedRelease7 = options.Releases.First(r => r.Id == "Release-7");
 
-        var expectedRetainReleases = new List<Release>
+        var expectedRetainReleases = new List<ReleaseDto>
         {
             expectedRelease1,
             expectedRelease1,

@@ -1,6 +1,6 @@
-﻿namespace ReleaseRetainer.Entities;
+﻿namespace ReleaseRetainer.Dtos;
 
-public record Deployment
+public record DeploymentDto
 {
     public string Id { get; set; }
     public string ReleaseId { get; set; }

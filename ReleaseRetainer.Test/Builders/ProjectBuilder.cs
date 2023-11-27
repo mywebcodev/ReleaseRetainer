@@ -1,8 +1,8 @@
-﻿using ReleaseRetainer.Entities;
+﻿using ReleaseRetainer.Dtos;
 
 namespace ReleaseRetainer.Test.Builders;
 
-public class ProjectBuilder : GenericBuilder<Project>
+public class ProjectBuilder : GenericBuilder<ProjectDto>
 {
     public override ProjectBuilder CreateRandom()
     {

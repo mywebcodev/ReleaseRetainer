@@ -1,6 +1,6 @@
-﻿namespace ReleaseRetainer.Entities;
+﻿namespace ReleaseRetainer.Dtos;
 
-public record Release
+public record ReleaseDto
 {
     public string Id { get; set; }
     public string? ProjectId { get; set; }

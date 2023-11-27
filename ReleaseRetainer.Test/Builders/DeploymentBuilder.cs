@@ -1,9 +1,9 @@
-﻿using ReleaseRetainer.Entities;
+﻿using ReleaseRetainer.Dtos;
 using ReleaseRetainer.Test.Helpers;
 
 namespace ReleaseRetainer.Test.Builders;
 
-public class DeploymentBuilder : GenericBuilder<Deployment>
+public class DeploymentBuilder : GenericBuilder<DeploymentDto>
 {
     public override DeploymentBuilder CreateRandom()
     {

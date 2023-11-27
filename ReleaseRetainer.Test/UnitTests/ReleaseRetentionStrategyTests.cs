@@ -1,12 +1,11 @@
 ﻿using FluentAssertions;
 using NSubstitute;
 using NUnit.Framework;
-using ReleaseRetainer.Entities;
+using ReleaseRetainer.Dtos;
 using ReleaseRetainer.Models;
 using ReleaseRetainer.Strategies;
 using ReleaseRetainer.Test.Builders;
 using ReleaseRetainer.Test.Mocks;
-using Environment = ReleaseRetainer.Entities.Environment;
 
 namespace ReleaseRetainer.Test.UnitTests;
 
@@ -34,12 +33,12 @@ public class ReleaseRetentionStrategyTests
         _logger.Logs.Should().Contain(Expectations.LogExpectations.CreateExpectedRetainedReleaseLogMessage(releaseId, envId));
     }
 
-    private static Project CreateProject()
+    private static ProjectDto CreateProject()
     {
         return ProjectBuilder.CreateRandom().Build();
     }
 
-    private static Release CreateRelease(string projectId, DateTime created)
+    private static ReleaseDto CreateRelease(string projectId, DateTime created)
     {
         return ReleaseBuilder
                .CreateRandom()
@@ -48,14 +47,14 @@ public class ReleaseRetentionStrategyTests
                .Build();
     }
 
-    private static Environment CreateEnvironment()
+    private static EnvironmentDto CreateEnvironment()
     {
         return EnvironmentBuilder
                .CreateRandom()
                .Build();
     }
 
-    private static ReleaseRetainOptions CreateReleaseRetainOptions(IEnumerable<Deployment> deployments, IEnumerable<Environment> environments, IEnumerable<Project> projects, IEnumerable<Release> releases, int numOfReleasesToKeep)
+    private static ReleaseRetainOptions CreateReleaseRetainOptions(IEnumerable<DeploymentDto> deployments, IEnumerable<EnvironmentDto> environments, IEnumerable<ProjectDto> projects, IEnumerable<ReleaseDto> releases, int numOfReleasesToKeep)
     {
         return ReleaseRetainOptionsBuilder
                .With(p => p.Deployments, deployments)
@@ -66,7 +65,7 @@ public class ReleaseRetentionStrategyTests
                .Build();
     }
 
-    private static Deployment CreateDeployment(string releaseId, string environmentId, DateTime deployedAt)
+    private static DeploymentDto CreateDeployment(string releaseId, string environmentId, DateTime deployedAt)
     {
         return DeploymentBuilder
                .CreateRandom()
@@ -83,16 +82,16 @@ public class ReleaseRetentionStrategyTests
         var environment = CreateEnvironment();
         var deployment = CreateDeployment(release.Id, environment.Id, UtcNow);
 
-        var deployments = new List<Deployment> {deployment};
-        var environments = new List<Environment> {environment};
-        var releases = new List<Release> {release};
-        var projects = new List<Project> {project};
+        var deployments = new List<DeploymentDto> {deployment};
+        var environments = new List<EnvironmentDto> {environment};
+        var releases = new List<ReleaseDto> {release};
+        var projects = new List<ProjectDto> {project};
         var numOfReleasesToKeep = 5;
 
-        yield return new TestCaseData(CreateReleaseRetainOptions(Array.Empty<Deployment>(), environments, projects, releases, numOfReleasesToKeep)) {TestName = "Deployments"};
-        yield return new TestCaseData(CreateReleaseRetainOptions(deployments, Array.Empty<Environment>(), projects, releases, numOfReleasesToKeep)) {TestName = "Environments"};
-        yield return new TestCaseData(CreateReleaseRetainOptions(deployments, environments, Array.Empty<Project>(), releases, numOfReleasesToKeep)) {TestName = "Projects"};
-        yield return new TestCaseData(CreateReleaseRetainOptions(deployments, environments, projects, Array.Empty<Release>(), numOfReleasesToKeep)) {TestName = "Release"};
+        yield return new TestCaseData(CreateReleaseRetainOptions(Array.Empty<DeploymentDto>(), environments, projects, releases, numOfReleasesToKeep)) {TestName = "Deployments"};
+        yield return new TestCaseData(CreateReleaseRetainOptions(deployments, Array.Empty<EnvironmentDto>(), projects, releases, numOfReleasesToKeep)) {TestName = "Environments"};
+        yield return new TestCaseData(CreateReleaseRetainOptions(deployments, environments, Array.Empty<ProjectDto>(), releases, numOfReleasesToKeep)) {TestName = "Projects"};
+        yield return new TestCaseData(CreateReleaseRetainOptions(deployments, environments, projects, Array.Empty<ReleaseDto>(), numOfReleasesToKeep)) {TestName = "Release"};
     }
 
     private static IEnumerable<TestCaseData> OrphanedReleasesTestCases()
@@ -102,17 +101,17 @@ public class ReleaseRetentionStrategyTests
         var environment = CreateEnvironment();
         var numOfReleasesToKeep = 2;
 
-        var environments = new List<Environment> {environment};
-        var releases = new List<Release> {release};
-        var projects = new List<Project> {project};
+        var environments = new List<EnvironmentDto> {environment};
+        var releases = new List<ReleaseDto> {release};
+        var projects = new List<ProjectDto> {project};
 
         var releaseWithoutProject = CreateRelease(null, UtcNow);
 
         var deploymentForReleaseWithoutProject = CreateDeployment(releaseWithoutProject.Id, environment.Id, UtcNow);
         var deploymentWithDifferentRelease = DeploymentBuilder.CreateRandom().Build();
 
-        yield return new TestCaseData(CreateReleaseRetainOptions(new List<Deployment> {deploymentForReleaseWithoutProject}, environments, projects, new List<Release> {releaseWithoutProject}, numOfReleasesToKeep)) {TestName = "ReleaseWithoutProject"};
-        yield return new TestCaseData(CreateReleaseRetainOptions(new List<Deployment> {deploymentWithDifferentRelease}, environments, projects, releases, numOfReleasesToKeep)) {TestName = "ReleaseWithoutDeployment"};
+        yield return new TestCaseData(CreateReleaseRetainOptions(new List<DeploymentDto> {deploymentForReleaseWithoutProject}, environments, projects, new List<ReleaseDto> {releaseWithoutProject}, numOfReleasesToKeep)) {TestName = "ReleaseWithoutProject"};
+        yield return new TestCaseData(CreateReleaseRetainOptions(new List<DeploymentDto> {deploymentWithDifferentRelease}, environments, projects, releases, numOfReleasesToKeep)) {TestName = "ReleaseWithoutDeployment"};
     }
 
     [Test]
@@ -127,10 +126,10 @@ public class ReleaseRetentionStrategyTests
         var deployment1 = CreateDeployment(release2.Id, environment.Id, UtcNow);
         var deployment2 = CreateDeployment(release1.Id, environment.Id, UtcNow);
 
-        var deployments = new List<Deployment> {deployment1, deployment2};
-        var environments = new List<Environment> {environment};
-        var releases = new List<Release> {release1, release2};
-        var projects = new List<Project> {project};
+        var deployments = new List<DeploymentDto> {deployment1, deployment2};
+        var environments = new List<EnvironmentDto> {environment};
+        var releases = new List<ReleaseDto> {release1, release2};
+        var projects = new List<ProjectDto> {project};
 
         var options = CreateReleaseRetainOptions(deployments, environments, projects, releases, 1);
 
@@ -157,10 +156,10 @@ public class ReleaseRetentionStrategyTests
         var deployment1 = CreateDeployment(release2.Id, environment.Id, UtcNow);
         var deployment2 = CreateDeployment(release1.Id, environment.Id, UtcNow.AddHours(1));
 
-        var deployments = new List<Deployment> {deployment1, deployment2};
-        var environments = new List<Environment> {environment};
-        var releases = new List<Release> {release1, release2};
-        var projects = new List<Project> {project};
+        var deployments = new List<DeploymentDto> {deployment1, deployment2};
+        var environments = new List<EnvironmentDto> {environment};
+        var releases = new List<ReleaseDto> {release1, release2};
+        var projects = new List<ProjectDto> {project};
 
         var options = CreateReleaseRetainOptions(deployments, environments, projects, releases, 1);
 
@@ -189,10 +188,10 @@ public class ReleaseRetentionStrategyTests
         var deployment3 = CreateDeployment(release.Id, environment2.Id, UtcNow);
         var deployment4 = CreateDeployment(release.Id, environment2.Id, UtcNow.AddHours(1));
 
-        var deployments = new List<Deployment> {deployment1, deployment2, deployment4, deployment3};
-        var environments = new List<Environment> {environment1, environment2};
-        var releases = new List<Release> {release};
-        var projects = new List<Project> {project};
+        var deployments = new List<DeploymentDto> {deployment1, deployment2, deployment4, deployment3};
+        var environments = new List<EnvironmentDto> {environment1, environment2};
+        var releases = new List<ReleaseDto> {release};
+        var projects = new List<ProjectDto> {project};
 
         var options = CreateReleaseRetainOptions(deployments, environments, projects, releases, 1);
 
@@ -242,10 +241,10 @@ public class ReleaseRetentionStrategyTests
 
         var deployment = CreateDeployment(release.Id, null, UtcNow);
 
-        var deployments = new List<Deployment> {deployment};
-        var environments = new List<Environment> {environment};
-        var releases = new List<Release> {release};
-        var projects = new List<Project> {project};
+        var deployments = new List<DeploymentDto> {deployment};
+        var environments = new List<EnvironmentDto> {environment};
+        var releases = new List<ReleaseDto> {release};
+        var projects = new List<ProjectDto> {project};
 
         var options = CreateReleaseRetainOptions(deployments, environments, projects, releases, 1);
 
@@ -269,10 +268,10 @@ public class ReleaseRetentionStrategyTests
         var deployment1 = CreateDeployment(release1.Id, environment.Id, UtcNow);
         var deployment2 = CreateDeployment(release2.Id, environment.Id, UtcNow);
 
-        var deployments = new List<Deployment> {deployment1, deployment2};
-        var environments = new List<Environment> {environment};
-        var releases = new List<Release> {release1, release2};
-        var projects = new List<Project> {project};
+        var deployments = new List<DeploymentDto> {deployment1, deployment2};
+        var environments = new List<EnvironmentDto> {environment};
+        var releases = new List<ReleaseDto> {release1, release2};
+        var projects = new List<ProjectDto> {project};
 
         var options = CreateReleaseRetainOptions(deployments, environments, projects, releases, 3);
 

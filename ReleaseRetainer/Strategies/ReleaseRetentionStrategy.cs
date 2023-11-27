@@ -1,12 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
-using ReleaseRetainer.Entities;
+using ReleaseRetainer.Dtos;
 using ReleaseRetainer.Models;
 
 namespace ReleaseRetainer.Strategies;
 
 public interface IReleaseRetentionStrategy
 {
-    IEnumerable<Release> RetainReleases(ReleaseRetainOptions options);
+    IEnumerable<ReleaseDto> RetainReleases(ReleaseRetainOptions options);
 }
 
 // https://learn.microsoft.com/en-us/dotnet/core/extensions/logging-library-authors
@@ -16,14 +16,14 @@ public interface IReleaseRetentionStrategy
 public class ReleaseRetentionStrategy(ILogger<ReleaseRetentionStrategy> logger) : IReleaseRetentionStrategy
 {
     // Create a dictionary for deployments per environment, ordered by DeployedAt
-    private static Dictionary<(string ReleaseId, string EnvironmentId), List<Deployment>> CreateReleaseDeploymentsPerEnvironmentMap(IEnumerable<Deployment> deployments)
+    private static Dictionary<(string ReleaseId, string EnvironmentId), List<DeploymentDto>> CreateReleaseDeploymentsPerEnvironmentMap(IEnumerable<DeploymentDto> deployments)
     {
         return deployments
                .GroupBy(d => (d.ReleaseId, d.EnvironmentId))
                .ToDictionary(k => k.Key, v => v.OrderByDescending(d => d.DeployedAt).ToList());
     }
 
-    private void LogRetainedReleases(IEnumerable<Release> releases, string environmentId)
+    private void LogRetainedReleases(IEnumerable<ReleaseDto> releases, string environmentId)
     {
         foreach (var release in releases)
         {
@@ -41,7 +41,7 @@ public class ReleaseRetentionStrategy(ILogger<ReleaseRetentionStrategy> logger) 
     // For instance, a release with the same Id can be deployed within different projects or environments.
     // To avoid duplicates, an additional check is needed:
     // If a release with the same Id is already retained, skip retaining it.
-    public IEnumerable<Release> RetainReleases(ReleaseRetainOptions options)
+    public IEnumerable<ReleaseDto> RetainReleases(ReleaseRetainOptions options)
     {
         var releases = options.Releases;
         var deployments = options.Deployments;
@@ -52,7 +52,7 @@ public class ReleaseRetentionStrategy(ILogger<ReleaseRetentionStrategy> logger) 
 
         var releaseDeploymentsPerEnvironment = CreateReleaseDeploymentsPerEnvironmentMap(deployments);
 
-        var retainedReleases = new List<Release>();
+        var retainedReleases = new List<ReleaseDto>();
 
         foreach (var project in projects)
         {

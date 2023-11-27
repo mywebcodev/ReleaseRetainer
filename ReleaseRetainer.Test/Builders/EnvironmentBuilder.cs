@@ -1,10 +1,9 @@
-﻿using ReleaseRetainer.Test.Helpers;
+﻿using ReleaseRetainer.Dtos;
+using ReleaseRetainer.Test.Helpers;
 
 namespace ReleaseRetainer.Test.Builders;
 
-using Environment = Entities.Environment;
-
-public class EnvironmentBuilder : GenericBuilder<Environment>
+public class EnvironmentBuilder : GenericBuilder<EnvironmentDto>
 {
     public override EnvironmentBuilder CreateRandom()
     {

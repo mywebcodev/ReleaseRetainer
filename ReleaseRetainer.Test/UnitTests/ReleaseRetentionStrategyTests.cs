@@ -34,196 +34,107 @@ public class ReleaseRetentionStrategyTests
         _logger.Logs.Should().Contain(Expectations.LogExpectations.CreateExpectedRetainedReleaseLogMessage(releaseId, envId));
     }
 
+    private static Project CreateProject()
+    {
+        return ProjectBuilder.CreateRandom().Build();
+    }
+
+    private static Release CreateRelease(string projectId, DateTime created)
+    {
+        return ReleaseBuilder
+               .CreateRandom()
+               .With(p => p.ProjectId, projectId)
+               .With(p => p.Created, created)
+               .Build();
+    }
+
+    private static Environment CreateEnvironment()
+    {
+        return EnvironmentBuilder
+               .CreateRandom()
+               .Build();
+    }
+
+    private static ReleaseRetainOptions CreateReleaseRetainOptions(IEnumerable<Deployment> deployments, IEnumerable<Environment> environments, IEnumerable<Project> projects, IEnumerable<Release> releases, int numOfReleasesToKeep)
+    {
+        return ReleaseRetainOptionsBuilder
+               .With(p => p.Deployments, deployments)
+               .With(p => p.Environments, environments)
+               .With(p => p.Projects, projects)
+               .With(p => p.Releases, releases)
+               .With(p => p.NumOfReleasesToKeep, numOfReleasesToKeep)
+               .Build();
+    }
+
+    private static Deployment CreateDeployment(string releaseId, string environmentId, DateTime deployedAt)
+    {
+        return DeploymentBuilder
+               .CreateRandom()
+               .With(p => p.ReleaseId, releaseId)
+               .With(p => p.EnvironmentId, environmentId)
+               .With(p => p.DeployedAt, deployedAt)
+               .Build();
+    }
+
     private static IEnumerable<TestCaseData> EmptyCollectionsTestCases()
     {
         var project = ProjectBuilder.CreateRandom().Build();
+        var release = CreateRelease(project.Id, UtcNow);
+        var environment = CreateEnvironment();
+        var deployment = CreateDeployment(release.Id, environment.Id, UtcNow);
 
-        var release = ReleaseBuilder
-                      .CreateRandom()
-                      .With(p => p.ProjectId, project.Id)
-                      .Build();
-        var environment = EnvironmentBuilder
-                          .CreateRandom()
-                          .Build();
+        var deployments = new List<Deployment> {deployment};
+        var environments = new List<Environment> {environment};
+        var releases = new List<Release> {release};
+        var projects = new List<Project> {project};
+        var numOfReleasesToKeep = 5;
 
-        var deployment = DeploymentBuilder
-                         .With(p => p.Id, "Deployment-1")
-                         .With(p => p.ReleaseId, release.Id)
-                         .With(p => p.EnvironmentId, environment.Id)
-                         .With(p => p.DeployedAt, UtcNow)
-                         .Build();
-
-        var deployments = new List<Deployment>
-        {
-            deployment
-        };
-
-        var environments = new List<Environment>
-        {
-            environment
-        };
-
-        var releases = new List<Release>
-        {
-            release
-        };
-
-        var projects = new List<Project>
-        {
-            project
-        };
-
-        yield return new TestCaseData(ReleaseRetainOptionsBuilder
-                                      .With(p => p.Deployments, Array.Empty<Deployment>())
-                                      .With(p => p.Environments, environments)
-                                      .With(p => p.Projects, projects)
-                                      .With(p => p.Releases, releases)
-                                      .With(p => p.NumOfReleasesToKeep, 1)
-                                      .Build())
-        { TestName = "Deployments" };
-        yield return new TestCaseData(ReleaseRetainOptionsBuilder
-                                      .With(p => p.Deployments, deployments)
-                                      .With(p => p.Environments, Array.Empty<Environment>())
-                                      .With(p => p.Projects, projects)
-                                      .With(p => p.Releases, releases)
-                                      .With(p => p.NumOfReleasesToKeep, 1)
-                                      .Build())
-        { TestName = "Environments" };
-        yield return new TestCaseData(ReleaseRetainOptionsBuilder
-                                      .With(p => p.Deployments, deployments)
-                                      .With(p => p.Environments, environments)
-                                      .With(p => p.Projects, Array.Empty<Project>())
-                                      .With(p => p.Releases, releases)
-                                      .With(p => p.NumOfReleasesToKeep, 1)
-                                      .Build())
-        { TestName = "Projects" };
-        yield return new TestCaseData(ReleaseRetainOptionsBuilder
-                                      .With(p => p.Deployments, deployments)
-                                      .With(p => p.Environments, environments)
-                                      .With(p => p.Projects, projects)
-                                      .With(p => p.Releases, Array.Empty<Release>())
-                                      .With(p => p.NumOfReleasesToKeep, 1)
-                                      .Build())
-        { TestName = "Release" };
+        yield return new TestCaseData(CreateReleaseRetainOptions(Array.Empty<Deployment>(), environments, projects, releases, numOfReleasesToKeep)) {TestName = "Deployments"};
+        yield return new TestCaseData(CreateReleaseRetainOptions(deployments, Array.Empty<Environment>(), projects, releases, numOfReleasesToKeep)) {TestName = "Environments"};
+        yield return new TestCaseData(CreateReleaseRetainOptions(deployments, environments, Array.Empty<Project>(), releases, numOfReleasesToKeep)) {TestName = "Projects"};
+        yield return new TestCaseData(CreateReleaseRetainOptions(deployments, environments, projects, Array.Empty<Release>(), numOfReleasesToKeep)) {TestName = "Release"};
     }
 
     private static IEnumerable<TestCaseData> OrphanedReleasesTestCases()
     {
-        var project = ProjectBuilder.CreateRandom().Build();
+        var project = CreateProject();
+        var release = CreateRelease(project.Id, UtcNow);
+        var environment = CreateEnvironment();
+        var numOfReleasesToKeep = 2;
 
-        var release = ReleaseBuilder
-                      .CreateRandom()
-                      .With(p => p.ProjectId, project.Id)
-                      .Build();
-        var environment = EnvironmentBuilder
-                          .CreateRandom()
-                          .Build();
+        var environments = new List<Environment> {environment};
+        var releases = new List<Release> {release};
+        var projects = new List<Project> {project};
 
-        var environments = new List<Environment>
-        {
-            environment
-        };
+        var releaseWithoutProject = CreateRelease(null, UtcNow);
 
-        var releases = new List<Release>
-        {
-            release
-        };
-
-        var projects = new List<Project>
-        {
-            project
-        };
-
-        var releaseWithoutProject = ReleaseBuilder.CreateRandom()
-                                                  .With(p => p.ProjectId, null)
-                                                  .Build();
-
-        var deploymentForReleaseWithoutProject = DeploymentBuilder
-                                             .CreateRandom()
-                                             .With(p => p.ReleaseId, releaseWithoutProject.Id)
-                                             .With(p => p.EnvironmentId, environment.Id)
-                                             .Build();
-
+        var deploymentForReleaseWithoutProject = CreateDeployment(releaseWithoutProject.Id, environment.Id, UtcNow);
         var deploymentWithDifferentRelease = DeploymentBuilder.CreateRandom().Build();
 
-        yield return new TestCaseData(ReleaseRetainOptionsBuilder
-                                      .With(p => p.Deployments, new List<Deployment> { deploymentForReleaseWithoutProject })
-                                      .With(p => p.Environments, environments)
-                                      .With(p => p.Projects, projects)
-                                      .With(p => p.Releases, new List<Release> { releaseWithoutProject })
-                                      .With(p => p.NumOfReleasesToKeep, 1)
-                                      .Build())
-        { TestName = "ReleaseWithoutProject" };
-        yield return new TestCaseData(ReleaseRetainOptionsBuilder
-                                      .With(p => p.Deployments, new List<Deployment> { deploymentWithDifferentRelease })
-                                      .With(p => p.Environments, environments)
-                                      .With(p => p.Projects, projects)
-                                      .With(p => p.Releases, releases)
-                                      .With(p => p.NumOfReleasesToKeep, 1)
-                                      .Build())
-        { TestName = "ReleaseWithoutDeployment" };
+        yield return new TestCaseData(CreateReleaseRetainOptions(new List<Deployment> {deploymentForReleaseWithoutProject}, environments, projects, new List<Release> {releaseWithoutProject}, numOfReleasesToKeep)) {TestName = "ReleaseWithoutProject"};
+        yield return new TestCaseData(CreateReleaseRetainOptions(new List<Deployment> {deploymentWithDifferentRelease}, environments, projects, releases, numOfReleasesToKeep)) {TestName = "ReleaseWithoutDeployment"};
     }
 
     [Test]
     public void RetainReleases_KeepsReleaseWithSameDeploymentTime_ToTheSameEnvironment()
     {
         // Arrange
-        var project = ProjectBuilder.CreateRandom().Build();
+        var project = CreateProject();
+        var release1 = CreateRelease(project.Id, UtcNow);
+        var release2 = CreateRelease(project.Id, UtcNow.AddHours(1));
+        var environment = CreateEnvironment();
 
-        var release1 = ReleaseBuilder.CreateRandom()
-                                      .With(p => p.ProjectId, project.Id)
-                                      .With(p => p.Created, UtcNow)
-                                      .Build();
-        var release2 = ReleaseBuilder.CreateRandom()
-                                      .With(p => p.ProjectId, project.Id)
-                                      .With(p => p.Created, UtcNow.AddHours(1))
-                                      .Build();
-        var environment = EnvironmentBuilder.CreateRandom().Build();
+        var deployment1 = CreateDeployment(release2.Id, environment.Id, UtcNow);
+        var deployment2 = CreateDeployment(release1.Id, environment.Id, UtcNow);
 
-        var deployment1 = DeploymentBuilder
-                          .With(p => p.Id, "Deployment-1")
-                          .With(p => p.ReleaseId, release2.Id)
-                          .With(p => p.EnvironmentId, environment.Id)
-                          .With(p => p.DeployedAt, UtcNow)
-                          .Build();
-        var deployment2 = DeploymentBuilder
-                          .With(p => p.Id, "Deployment-2")
-                          .With(p => p.ReleaseId, release1.Id)
-                          .With(p => p.EnvironmentId, environment.Id)
-                          .With(p => p.DeployedAt, UtcNow)
-                          .Build();
+        var deployments = new List<Deployment> {deployment1, deployment2};
+        var environments = new List<Environment> {environment};
+        var releases = new List<Release> {release1, release2};
+        var projects = new List<Project> {project};
 
-        var deployments = new List<Deployment>
-        {
-            deployment1,
-            deployment2
-        };
+        var options = CreateReleaseRetainOptions(deployments, environments, projects, releases, 1);
 
-        var environments = new List<Environment>
-        {
-            environment
-        };
-
-        var releases = new List<Release>
-        {
-            release1,
-            release2
-        };
-
-        var projects = new List<Project>
-        {
-            project
-        };
-
-        var options = ReleaseRetainOptionsBuilder
-                      .With(p => p.Deployments, deployments)
-                      .With(p => p.Environments, environments)
-                      .With(p => p.Projects, projects)
-                      .With(p => p.Releases, releases)
-                      .With(p => p.NumOfReleasesToKeep, 1)
-                      .Build();
-
-        var expectedResult = new[] { release2 };
+        var expectedResult = new[] {release2};
 
         // Act
         var result = _systemUnderTest.RetainReleases(options);
@@ -238,65 +149,22 @@ public class ReleaseRetentionStrategyTests
     public void RetainReleases_KeepsReleaseWithDifferentDeploymentTime_ToTheSameEnvironment()
     {
         // Arrange
-        var project = ProjectBuilder.CreateRandom().Build();
+        var project = CreateProject();
+        var release1 = CreateRelease(project.Id, UtcNow);
+        var release2 = CreateRelease(project.Id, UtcNow.AddHours(1));
+        var environment = CreateEnvironment();
 
-        var release1 = ReleaseBuilder
-                       .CreateRandom()
-                       .With(p => p.ProjectId, project.Id)
-                       .With(p => p.Created, UtcNow)
-                       .Build();
-        var release2 = ReleaseBuilder
-                       .CreateRandom()
-                       .With(p => p.ProjectId, project.Id)
-                       .With(p => p.Created, UtcNow.AddHours(1))
-                       .Build();
+        var deployment1 = CreateDeployment(release2.Id, environment.Id, UtcNow);
+        var deployment2 = CreateDeployment(release1.Id, environment.Id, UtcNow.AddHours(1));
 
-        var environment = EnvironmentBuilder.CreateRandom().Build();
+        var deployments = new List<Deployment> {deployment1, deployment2};
+        var environments = new List<Environment> {environment};
+        var releases = new List<Release> {release1, release2};
+        var projects = new List<Project> {project};
 
-        var deployment1 = DeploymentBuilder
-                          .With(p => p.Id, "Deployment-1")
-                          .With(p => p.ReleaseId, release2.Id)
-                          .With(p => p.EnvironmentId, environment.Id)
-                          .With(p => p.DeployedAt, UtcNow)
-                          .Build();
-        var deployment2 = DeploymentBuilder
-                          .With(p => p.Id, "Deployment-2")
-                          .With(p => p.ReleaseId, release1.Id)
-                          .With(p => p.EnvironmentId, environment.Id)
-                          .With(p => p.DeployedAt, UtcNow.AddHours(1))
-                          .Build();
+        var options = CreateReleaseRetainOptions(deployments, environments, projects, releases, 1);
 
-        var deployments = new List<Deployment>
-        {
-            deployment1,
-            deployment2
-        };
-
-        var environments = new List<Environment>
-        {
-            environment
-        };
-
-        var releases = new List<Release>
-        {
-            release1,
-            release2
-        };
-
-        var projects = new List<Project>
-        {
-            project
-        };
-
-        var options = ReleaseRetainOptionsBuilder
-                      .With(p => p.Deployments, deployments)
-                      .With(p => p.Environments, environments)
-                      .With(p => p.Projects, projects)
-                      .With(p => p.Releases, releases)
-                      .With(p => p.NumOfReleasesToKeep, 1)
-                      .Build();
-
-        var expectedResult = new[] { release1 };
+        var expectedResult = new[] {release1};
 
         // Act
         var result = _systemUnderTest.RetainReleases(options);
@@ -311,78 +179,24 @@ public class ReleaseRetentionStrategyTests
     public void KeepsReleasesWithSameId_ForDifferentProjectAndEnvironmentCombinations()
     {
         // Arrange
-        var project = ProjectBuilder.CreateRandom().Build();
+        var project = CreateProject();
+        var release = CreateRelease(project.Id, UtcNow);
+        var environment1 = CreateEnvironment();
+        var environment2 = CreateEnvironment();
 
-        var release = ReleaseBuilder
-                      .CreateRandom()
-                      .With(p => p.ProjectId, project.Id)
-                      .Build();
+        var deployment1 = CreateDeployment(release.Id, environment1.Id, UtcNow);
+        var deployment2 = CreateDeployment(release.Id, environment1.Id, UtcNow.AddHours(1));
+        var deployment3 = CreateDeployment(release.Id, environment2.Id, UtcNow);
+        var deployment4 = CreateDeployment(release.Id, environment2.Id, UtcNow.AddHours(1));
 
-        var environment1 = EnvironmentBuilder
-                           .CreateRandom()
-                           .Build();
-        var environment2 = EnvironmentBuilder
-                           .CreateRandom()
-                           .Build();
+        var deployments = new List<Deployment> {deployment1, deployment2, deployment4, deployment3};
+        var environments = new List<Environment> {environment1, environment2};
+        var releases = new List<Release> {release};
+        var projects = new List<Project> {project};
 
-        var deployment1 = DeploymentBuilder
-                          .With(p => p.Id, "Deployment-1")
-                          .With(p => p.ReleaseId, release.Id)
-                          .With(p => p.EnvironmentId, environment1.Id)
-                          .With(p => p.DeployedAt, UtcNow)
-                          .Build();
-        var deployment2 = DeploymentBuilder
-                          .With(p => p.Id, "Deployment-2")
-                          .With(p => p.ReleaseId, release.Id)
-                          .With(p => p.EnvironmentId, environment1.Id)
-                          .With(p => p.DeployedAt, UtcNow.AddHours(1))
-                          .Build();
-        var deployment3 = DeploymentBuilder
-                          .With(p => p.Id, "Deployment-3")
-                          .With(p => p.ReleaseId, release.Id)
-                          .With(p => p.EnvironmentId, environment2.Id)
-                          .With(p => p.DeployedAt, UtcNow)
-                          .Build();
-        var deployment4 = DeploymentBuilder
-                          .With(p => p.Id, "Deployment-4")
-                          .With(p => p.ReleaseId, release.Id)
-                          .With(p => p.EnvironmentId, environment2.Id)
-                          .With(p => p.DeployedAt, UtcNow.AddHours(1))
-                          .Build();
+        var options = CreateReleaseRetainOptions(deployments, environments, projects, releases, 1);
 
-        var deployments = new List<Deployment>
-        {
-            deployment1,
-            deployment2,
-            deployment4,
-            deployment3
-        };
-
-        var environments = new List<Environment>
-        {
-            environment1,
-            environment2
-        };
-
-        var releases = new List<Release>
-        {
-            release
-        };
-
-        var projects = new List<Project>
-        {
-            project
-        };
-
-        var options = ReleaseRetainOptionsBuilder
-                      .With(p => p.Deployments, deployments)
-                      .With(p => p.Environments, environments)
-                      .With(p => p.Projects, projects)
-                      .With(p => p.Releases, releases)
-                      .With(p => p.NumOfReleasesToKeep, 1)
-                      .Build();
-
-        var expectedResult = new[] { release, release };
+        var expectedResult = new[] {release, release};
 
         // Act
         var result = _systemUnderTest.RetainReleases(options);
@@ -393,7 +207,6 @@ public class ReleaseRetentionStrategyTests
         AssertLogMessage(release.Id, environment1.Id);
         AssertLogMessage(release.Id, environment2.Id);
     }
-
 
     [Test]
     [TestCaseSource(nameof(EmptyCollectionsTestCases))]
@@ -423,51 +236,18 @@ public class ReleaseRetentionStrategyTests
     public void ShouldNotThrowException_WhenDeploymentWithoutEnvironment()
     {
         // Arrange
-        var project = ProjectBuilder.CreateRandom().Build();
+        var project = CreateProject();
+        var release = CreateRelease(project.Id, UtcNow);
+        var environment = CreateEnvironment();
 
-        var release = ReleaseBuilder
-                      .CreateRandom()
-                      .With(p => p.ProjectId, project.Id)
-                      .Build();
+        var deployment = CreateDeployment(release.Id, null, UtcNow);
 
-        var environment = EnvironmentBuilder
-                           .CreateRandom()
-                           .Build();
+        var deployments = new List<Deployment> {deployment};
+        var environments = new List<Environment> {environment};
+        var releases = new List<Release> {release};
+        var projects = new List<Project> {project};
 
-        var deployment1 = DeploymentBuilder
-                          .With(p => p.Id, "Deployment-1")
-                          .With(p => p.ReleaseId, release.Id)
-                          .With(p => p.EnvironmentId, null)
-                          .With(p => p.DeployedAt, UtcNow)
-                          .Build();
-
-        var deployments = new List<Deployment>
-        {
-            deployment1
-        };
-
-        var environments = new List<Environment>
-        {
-            environment
-        };
-
-        var releases = new List<Release>
-        {
-            release
-        };
-
-        var projects = new List<Project>
-        {
-            project
-        };
-
-        var options = ReleaseRetainOptionsBuilder
-                      .With(p => p.Deployments, deployments)
-                      .With(p => p.Environments, environments)
-                      .With(p => p.Projects, projects)
-                      .With(p => p.Releases, releases)
-                      .With(p => p.NumOfReleasesToKeep, 5)
-                      .Build();
+        var options = CreateReleaseRetainOptions(deployments, environments, projects, releases, 1);
 
         // Act
         var result = _systemUnderTest.RetainReleases(options);
@@ -481,67 +261,22 @@ public class ReleaseRetentionStrategyTests
     public void ShouldRetainAllReleasesInProjectAndEnvironment_WhenProjectsWithFewerReleasesThanNumOfReleasesToKeep()
     {
         // Arrange
-        var project = ProjectBuilder.CreateRandom().Build();
+        var project = CreateProject();
+        var release1 = CreateRelease(project.Id, UtcNow);
+        var release2 = CreateRelease(project.Id, UtcNow.AddHours(1));
+        var environment = CreateEnvironment();
 
-        var release1 = ReleaseBuilder
-                      .CreateRandom()
-                      .With(p => p.ProjectId, project.Id)
-                      .Build();
+        var deployment1 = CreateDeployment(release1.Id, environment.Id, UtcNow);
+        var deployment2 = CreateDeployment(release2.Id, environment.Id, UtcNow);
 
-        var release2 = ReleaseBuilder
-                      .CreateRandom()
-                      .With(p => p.ProjectId, project.Id)
-                      .Build();
+        var deployments = new List<Deployment> {deployment1, deployment2};
+        var environments = new List<Environment> {environment};
+        var releases = new List<Release> {release1, release2};
+        var projects = new List<Project> {project};
 
-        var environment = EnvironmentBuilder
-                           .CreateRandom()
-                           .Build();
+        var options = CreateReleaseRetainOptions(deployments, environments, projects, releases, 3);
 
-        var deployment1 = DeploymentBuilder
-                          .With(p => p.Id, "Deployment-1")
-                          .With(p => p.ReleaseId, release1.Id)
-                          .With(p => p.EnvironmentId, environment.Id)
-                          .With(p => p.DeployedAt, UtcNow)
-                          .Build();
-
-        var deployment2 = DeploymentBuilder
-                         .With(p => p.Id, "Deployment-2")
-                         .With(p => p.ReleaseId, release2.Id)
-                         .With(p => p.EnvironmentId, environment.Id)
-                         .With(p => p.DeployedAt, UtcNow)
-                         .Build();
-
-        var deployments = new List<Deployment>
-        {
-            deployment1,
-            deployment2
-        };
-
-        var environments = new List<Environment>
-        {
-            environment
-        };
-
-        var releases = new List<Release>
-        {
-            release1,
-            release2
-        };
-
-        var projects = new List<Project>
-        {
-            project
-        };
-
-        var options = ReleaseRetainOptionsBuilder
-                      .With(p => p.Deployments, deployments)
-                      .With(p => p.Environments, environments)
-                      .With(p => p.Projects, projects)
-                      .With(p => p.Releases, releases)
-                      .With(p => p.NumOfReleasesToKeep, 5)
-                      .Build();
-
-        var expectedResult = new[] { release1, release2 };
+        var expectedResult = new[] {release1, release2};
 
         // Act
         var result = _systemUnderTest.RetainReleases(options);

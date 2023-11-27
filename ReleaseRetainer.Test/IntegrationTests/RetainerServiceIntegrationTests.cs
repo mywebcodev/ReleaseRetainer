@@ -11,7 +11,7 @@ using ReleaseRetainer.Test.Mocks;
 namespace ReleaseRetainer.Test.IntegrationTests;
 
 [TestFixture]
-public class RetainerServiceTests
+public class RetainerServiceIntegrationTests
 {
     private static readonly ReleaseRetainOptionsBuilder ReleaseRetainOptionsBuilder = new();
     private ServiceProvider _serviceProvider;

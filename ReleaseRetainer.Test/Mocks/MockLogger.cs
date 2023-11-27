@@ -28,7 +28,7 @@ public class MockLogger<T> : ILogger<T>
         return true;
     }
 
-    public IDisposable? BeginScope<TState>(TState state) where TState : notnull
+    public IDisposable BeginScope<TState>(TState state) where TState : notnull
     {
         return default!;
     }
